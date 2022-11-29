@@ -14,6 +14,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/oauth/token")
 
 @router.post('')
 async def sign_up(user: User):
+    print(user)
     service = UserService()
     return await service.create_new_user(user)
 

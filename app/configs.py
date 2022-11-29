@@ -12,6 +12,7 @@ MONGO_PORT = config('MONGO_PORT', cast=str, default='27017')
 MONGO_DB_NAME = config("MONGO_DB_NAME", cast=str, default='new_project')
 
 MONGO_USERS_COLLECTION = config("MONGO_USERS_COLLECTION", cast=str, default='users_collection')
+MONGO_USER_PERSISTENCIA_COLLECTION = config('MONGO_USER_PERSISTENCIA_COLLECTION',cast=str,default="user_persistencia_collection")
 
 MONGO_URL = f'mongodb://{MONGO_HOST}:{MONGO_PORT}'
 MONGO_TIMEOUT = 1000
@@ -20,3 +21,5 @@ SECRET_KEY = config('SECRET_KEY', cast=str, default='09d25e094faa6ca2556c818166b
 ALGORITHM = config('ALGORITHM', cast=str, default='HS256')
 ACCESS_TOKEN_EXP = config('ACCESS_TOKEN_EXP', cast=int, default=60*24)
 REFRESH_TOKEN_EXP = config('REFRESH_TOKEN_EXP', cast=int, default=60*24*30)
+
+PATH_FILENAME = config('PATH_FILENAME',cast=str,default="Uploads")

@@ -16,7 +16,8 @@ from .utils import (
 from .routes import (
     HealthRoutes,
     UserRoutes,
-    AuthRoutes
+    AuthRoutes,
+    UserPersistencia
 )
 
 
@@ -37,6 +38,7 @@ app.add_event_handler("shutdown", shutdown_handler)
 app.include_router(HealthRoutes, prefix=f'{API_PREFIX}/health')
 app.include_router(UserRoutes, prefix=f'{API_PREFIX}/users')
 app.include_router(AuthRoutes, prefix=f'{API_PREFIX}/oauth')
+app.include_router(UserPersistencia,prefix=f'{API_PREFIX}/userpersistencia')
 
 app.add_exception_handler(HTTPException, http_exception_handler)
 
