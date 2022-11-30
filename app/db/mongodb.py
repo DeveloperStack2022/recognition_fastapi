@@ -139,17 +139,31 @@ class MongoDB:
             )
     async def get_user_persistencia(self):
         try:
-            users = self._coll_pers.find({})
-            print(list(users))
+            users = self._coll_pers.find({"disabled":False})
+            # print(list(users))
             if not users:
                 return False
+       
+            return list(users)
+            # for u in users:
+            #     return u
 
-            for u in users:
-                return u
-
-            return False
+            # return False
         except PyMongoError:
             raise HTTPException(
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="PyMongo DB retrive error"
             )
+
+    async def delete_user_persistencia(self,numero_cedula:str):
+        try:
+            user = self._coll_pers.find_one_and_update({'numero_cedula':numero_cedula},{'$set':{
+                'disabled':True
+            }})
+            return user
+        except PyMongoError:
+            raise HTTPException(
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="PyMongo DB delete error"
+            )
+            

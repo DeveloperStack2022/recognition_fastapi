@@ -1,3 +1,5 @@
+from fastapi.encoders import jsonable_encoder
+from http.client import HTTPException
 from ..utils import build_response
 from ..db import (MongoDB,get_client)
 from ..models.user_persistencia import (UserPersistencia,OutUserPersistencia,UpdateUserPersistencia)
@@ -22,12 +24,25 @@ class UserPersistenciaService:
         return await build_response(HTTP_201_CREATED,msg="New User Created")
     
     async def get_users_persistencia(self):
-        user = await self._db.get_user_persistencia()
-        if user:
+        users = await self._db.get_user_persistencia()
+        # items = jsonable_encoder(users)
+        userList = [OutUserPersistencia(**user) for user in users]
+        if users:
            return JSONResponse(
             status_code=HTTP_200_OK,
             content={
                 'success': True,
-                'payload': OutUserPersistencia(**user).dict()
+                'payload': jsonable_encoder(userList)
             },
+        )
+
+    async  def delete_user_persistencia(self,numero_cedula:str):
+        user = await self._db.delete_user_persistencia(numero_cedula)
+
+        if user:
+            return await build_response(msg="Usuario eliminado existosamente")
+        
+        raise HTTPException(
+            status_code=HTTP_204_NO_CONTENT,
+            detail="Existe un fallo al eliminar el usuario"
         )

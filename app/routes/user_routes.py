@@ -9,7 +9,7 @@ from ..models import (
 )
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/oauth/token")
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/oauth/token")
 
 
 @router.post('')
@@ -20,18 +20,18 @@ async def sign_up(user: User):
 
 
 @router.get('/me')
-async def current_user(token: str = Depends(oauth2_scheme)):
+async def current_user(token: str):
     service = UserService()
     return await service.get_current_user(token)
 
 
 @router.patch('')
-async def update_user(user: UpdateUser, token: str = Depends(oauth2_scheme)):
+async def update_user(user: UpdateUser, token: str):
     service = UserService()
     return await service.update_user(user, token)
 
 
 @router.delete('')
-async def delete_user(token: str = Depends(oauth2_scheme)):
+async def delete_user(token: str ):
     service = UserService()
     return await service.delete_user(token)

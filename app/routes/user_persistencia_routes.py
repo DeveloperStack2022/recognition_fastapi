@@ -34,3 +34,8 @@ async def addUserPersistencia(num_cedula:str = Form(...),nombres: str = Form(...
 async def getUsersPersistencia():
     services = UserPersistenciaService()
     return await services.get_users_persistencia()
+
+@router.delete('/delete_user')
+async def deleteUserPersistencia(numero_cedula:str):
+    services = UserPersistenciaService()
+    return await services.delete_user_persistencia(numero_cedula)

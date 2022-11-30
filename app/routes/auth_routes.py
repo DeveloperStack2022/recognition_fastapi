@@ -7,7 +7,7 @@ from ..models import LoginUser
 
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/oauth/token")
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/oauth/token")
 
 
 @router.post('/token')
@@ -17,6 +17,6 @@ async def login(user: LoginUser = Body(None, embed=True), grant_type: str = Body
 
 
 @router.get('/auth')
-async def authenticate(token: str = Depends(oauth2_scheme)):
+async def authenticate(token: str ):
     service = AuthService()
     return await service.validate_token(token)

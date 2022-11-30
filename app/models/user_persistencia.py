@@ -1,3 +1,4 @@
+
 from fastapi import HTTPException
 from typing import List,Optional
 from pydantic.class_validators import validator   
@@ -9,6 +10,7 @@ class BaseUserPersistencia(BaseModel):
     nombres:str = Field(...)
     apellidos:str = Field(...)
     images_id:List[str] = Field(...)
+    disabled:bool = Field(default=False)
 
 
 class UserPersistencia(BaseUserPersistencia):
@@ -51,10 +53,11 @@ class UpdateUserPersistencia(BaseModel):
     nombres:Optional[str] = None
     apellidos:Optional[str] = None
     images_id: Optional[list] = None
+    disable: Optional[bool] = None
 
 class OutUserPersistencia(BaseModel):
-    _id:str = Field(...)
     numero_cedula:str = Field(...)
     nombres:str = Field(...)
     apellidos:str = Field(...)
     images_id:List[str] = Field(...)
+    disabled:bool = Field(...)
