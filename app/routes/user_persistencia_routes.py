@@ -35,6 +35,11 @@ async def getUsersPersistencia():
     services = UserPersistenciaService()
     return await services.get_users_persistencia()
 
+@router.get("/getImages")
+async def getOneUserByNumCedula(numero_cedula:str):
+    services = UserPersistenciaService()
+    return await services.get_images_users(numero_cedula)
+
 @router.delete('/delete_user')
 async def deleteUserPersistencia(numero_cedula:str):
     services = UserPersistenciaService()

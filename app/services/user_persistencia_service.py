@@ -46,3 +46,14 @@ class UserPersistenciaService:
             status_code=HTTP_204_NO_CONTENT,
             detail="Existe un fallo al eliminar el usuario"
         )
+
+    async def get_images_users(self,numero_cedula:str):
+        user = await self._db.get_user_by_numero_cedula()
+        print(user)
+        return JSONResponse(
+            status_code=HTTP_200_OK,
+            content={
+                "success":True,
+                'payload':OutUserPersistencia(**user).dict()
+            }
+        )

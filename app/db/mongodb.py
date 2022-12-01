@@ -166,4 +166,13 @@ class MongoDB:
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="PyMongo DB delete error"
             )
-            
+    
+    async def get_user_by_numero_cedula(self,numero_cedula:str):
+        try:
+            user = self._coll_pers.find_one({"numero_cedula":numero_cedula})
+            return user
+        except PyMongoError:
+            raise HTTPException(
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="PyMongo DB Error al buscar el usuario"
+            )
