@@ -1,5 +1,9 @@
 import uvicorn
 
+from dotenv import load_dotenv
+load_dotenv()
+
+
 from starlette.middleware.cors import CORSMiddleware
 from fastapi import (
     FastAPI,
@@ -7,7 +11,7 @@ from fastapi import (
 )
 
 from .exceptions import http_exception_handler
-from .configs import API_PREFIX
+from .configs import (API_PREFIX,CLOUDINARY_API_SECRET,CLOUDINARY_CLOUD_API_KEY,CLOUDINARY_CLOUD_NAME)
 from .utils import (
     startup_handler,
     shutdown_handler
@@ -17,8 +21,10 @@ from .routes import (
     HealthRoutes,
     UserRoutes,
     AuthRoutes,
-    UserPersistencia
+    UserPersistencia,
+    UserDetect
 )
+
 
 
 app = FastAPI()
@@ -39,6 +45,7 @@ app.include_router(HealthRoutes, prefix=f'{API_PREFIX}/health')
 app.include_router(UserRoutes, prefix=f'{API_PREFIX}/users')
 app.include_router(AuthRoutes, prefix=f'{API_PREFIX}/oauth')
 app.include_router(UserPersistencia,prefix=f'{API_PREFIX}/userpersistencia')
+app.include_router(UserDetect,prefix=f'{API_PREFIX}/userdetect')
 
 app.add_exception_handler(HTTPException, http_exception_handler)
 

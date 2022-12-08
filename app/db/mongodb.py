@@ -16,7 +16,8 @@ from pymongo import (
 from ..configs import (
     MONGO_DB_NAME,
     MONGO_USERS_COLLECTION,
-    MONGO_USER_PERSISTENCIA_COLLECTION
+    MONGO_USER_PERSISTENCIA_COLLECTION,
+    MONGO_USER_DETECT_COLLECTION
 )
 
 
@@ -32,6 +33,7 @@ class MongoDB:
             # Collections Mongodb
             self._coll = self._db[MONGO_USERS_COLLECTION]
             self._coll_pers = self._db[MONGO_USER_PERSISTENCIA_COLLECTION]
+            self._coll_detect = self._db[MONGO_USER_DETECT_COLLECTION]
 
         except PyMongoError as e:
             logging.error(f'Database Connection Error ::: {e}')
@@ -175,4 +177,23 @@ class MongoDB:
             raise HTTPException(
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="PyMongo DB Error al buscar el usuario"
+            )
+    
+    async def create_user_detect(self,numero_cedula:str):
+        try:
+            user = self._coll_detect.insert_one({'numero_cedula': numero_cedula}).inserted_id
+            return str(user)
+        except:
+            raise HTTPException(
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="PyMongo DB Error"
+            )
+    async def delete_user_detect(self,numero_cedula:str):
+        try:
+            self._coll_detect.delete_many({})
+            return True
+        except:
+            raise HTTPException(
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="PyMongo DB Error"
             )

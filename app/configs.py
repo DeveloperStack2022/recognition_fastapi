@@ -1,5 +1,3 @@
-import os
-
 from starlette.config import Config
 
 config = Config('.env')
@@ -13,6 +11,7 @@ MONGO_DB_NAME = config("MONGO_DB_NAME", cast=str, default='new_project')
 
 MONGO_USERS_COLLECTION = config("MONGO_USERS_COLLECTION", cast=str, default='users_collection')
 MONGO_USER_PERSISTENCIA_COLLECTION = config('MONGO_USER_PERSISTENCIA_COLLECTION',cast=str,default="user_persistencia_collection")
+MONGO_USER_DETECT_COLLECTION = config('MONGO_USER_DETECT_COLLECTION',cast=str,default="user_detect")
 
 MONGO_URL = f'mongodb://{MONGO_HOST}:{MONGO_PORT}'
 MONGO_TIMEOUT = 1000
@@ -23,3 +22,7 @@ ACCESS_TOKEN_EXP = config('ACCESS_TOKEN_EXP', cast=int, default=60*24)
 REFRESH_TOKEN_EXP = config('REFRESH_TOKEN_EXP', cast=int, default=60*24*30)
 
 PATH_FILENAME = config('PATH_FILENAME',cast=str,default="Uploads")
+
+CLOUDINARY_CLOUD_NAME = config('CLOUD_NAME',cast=str)
+CLOUDINARY_CLOUD_API_KEY = config('CLOUD_API_KEY',cast=str)
+CLOUDINARY_API_SECRET = config('CLOUD_API_SECRET',cast=str) 
