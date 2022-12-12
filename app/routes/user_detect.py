@@ -209,6 +209,7 @@ async def faceRecognetion(image_original:UploadFile = File(...)):
 
     try:
         for img in imagenes:
+            
             _,file_extension = os.path.splitext(img.filename)
             img.filename = str(uuid.uuid1()) +  file_extension
             with open(os.path.join(path_dir, img.filename), 'wb') as file:
@@ -219,8 +220,51 @@ async def faceRecognetion(image_original:UploadFile = File(...)):
         imgReads: list = []
         path_dir = os.path.join(os.getcwd(),"Compare")
 
-
-        
-    
     except FileNotFoundError:
         return await build_response(HTTP_500_INTERNAL_SERVER_ERROR)    
+
+
+@router.post('/compareImageFaceRecognition')
+async def compareImageFaceRecognition(image_original:UploadFile = File(...),image_compare:UploadFile = File(...)):
+
+    try:
+        imgs:list = []
+        imgs.append(image_original)
+        imgs.append(image_compare)
+        if not  os.path.exists(os.path.join(os.getcwd(),"Compare")):
+            os.makedirs("Compare")
+        path_dir = os.path.join(os.getcwd(),"Compare")
+        
+        for img in imgs:
+            _,file_extension = os.path.splitext(img.filename)
+            img.filename = str(uuid.uuid1()) +  file_extension
+            with open(os.path.join(path_dir, img.filename), mode="wb") as file:
+                content = await img.read()
+                file.write(content)
+                file.close()
+        
+        know_encodings = []
+        dir = os.path.join(os.getcwd(),"Compare")
+        for files in os.listdir(dir):
+            img = os.path.join(os.getcwd(),"Compare")
+            l_img = face_recognition.load_image_file(str(img + "/" + files))
+            l_encod = face_recognition.face_encodings(l_img)[0]
+            know_encodings.append(l_encod)
+        
+        # Comparacion de distances
+        f_distance = face_recognition.face_distance([know_encodings[0]],know_encodings[1])
+        f_match_percentage  = (1-f_distance)*100
+
+
+        
+        string = str('http://localhost:8000/api/v0.1/userdetect/imageDetect/img_compare.jpg')
+        detect:dict = {
+            'url':string,
+            'match':np.round(f_match_percentage,2),
+            'keypoints_1':1,
+            'keypoints_2':1,
+            'good_pointsKeys':1
+        }
+        return await build_response(HTTP_200_OK,detect=detect)
+    except FileNotFoundError:
+        return await build_response(HTTP_500_INTERNAL_SERVER_ERROR)
