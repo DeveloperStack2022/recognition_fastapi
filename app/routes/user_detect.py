@@ -3,7 +3,7 @@ from fastapi import APIRouter,UploadFile,File
 import os
 import numpy as np
 import cv2
-from PIL import Image
+from PIL import Image, ImageDraw
 import face_recognition
 
 from ..utils import build_response
@@ -243,6 +243,7 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
                 file.write(content)
                 file.close()
         
+        load_img = []
         know_encodings = []
         dir = os.path.join(os.getcwd(),"Compare")
         for files in os.listdir(dir):
@@ -250,20 +251,33 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
             l_img = face_recognition.load_image_file(str(img + "/" + files))
             l_encod = face_recognition.face_encodings(l_img)[0]
             know_encodings.append(l_encod)
+            load_img.append(l_img)
         
         # Comparacion de distances
         f_distance = face_recognition.face_distance([know_encodings[0]],know_encodings[1])
         f_match_percentage  = (1-f_distance)*100
 
-
+        f_match = face_recognition.compare_faces([know_encodings[0]],know_encodings[1])
         
-        string = str('http://localhost:8000/api/v0.1/userdetect/imageDetect/img_compare.jpg')
+        face_landmarks_list = face_recognition.face_landmarks(load_img[0])
+
+        pil_image = Image.fromarray(load_img[0])
+        d = ImageDraw.Draw(pil_image)
+
+        for lendmarks in face_landmarks_list:
+            for facial_feature in lendmarks.keys():
+                d.line(lendmarks[facial_feature],width=4)
+        url = str(uuid.uuid1())        
+        pil_image.save(os.getcwd() + "/Matching/" + url +".jpg")
+
+        string = str('http://localhost:8000/api/v0.1/userdetect/imageDetect/'+ url + '.jpg')
         detect:dict = {
             'url':string,
-            'match':np.round(f_match_percentage,2),
+            'match':np.round(f_match_percentage,2)[0],
             'keypoints_1':1,
             'keypoints_2':1,
-            'good_pointsKeys':1
+            'good_pointsKeys':1,
+            'compare':"Si" if f_match[0] else "No"
         }
         return await build_response(HTTP_200_OK,detect=detect)
     except FileNotFoundError:
