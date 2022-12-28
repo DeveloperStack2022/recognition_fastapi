@@ -5,6 +5,8 @@ import numpy as np
 import cv2
 from PIL import Image, ImageDraw
 import face_recognition
+import  xml.etree.ElementTree as xml 
+
 
 from ..utils import build_response
 from starlette.status import (
@@ -162,8 +164,6 @@ def face_r():
         know_faces_name.append(file_name.split('.')[0])
 
 
-
-
 def generate(path:str):
     cap = cv2.VideoCapture(path)
     face_detector = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -226,15 +226,43 @@ async def faceRecognetion(image_original:UploadFile = File(...)):
 
 @router.post('/compareImageFaceRecognition')
 async def compareImageFaceRecognition(image_original:UploadFile = File(...),image_compare:UploadFile = File(...)):
+    # myimages  = MyImages()
+    """
+        Crate file XML -> bd_images.xml
+    """
+    # __________________________
+    path_dir = os.getcwd()
+    dir_file = os.path.join(path_dir,"BdXml/bd_images.xml")
 
+    if not os.path.exists(dir_file):
+        os.makedirs(dir_file)
+    # __________________________
+
+    
     try:
+        
+
         imgs:list = []
         imgs.append(image_original)
         imgs.append(image_compare)
         if not  os.path.exists(os.path.join(os.getcwd(),"Compare")):
             os.makedirs("Compare")
         path_dir = os.path.join(os.getcwd(),"Compare")
-        
+
+        # for img in imgs:
+        #     with open(os.path.join(path_dir, img.filename),mode='rb') as file:
+        #         string_image = base64.encode(file.read())
+
+        #     print(string_image)
+
+        # for img in imgs:
+        #     im = MyImages.image()
+        #     im.src = img
+        #     myimages.append(im)
+
+        # with open(str(dir_file),'w') as file:
+        #     file.write(myimages.toxml("utf-8")) 
+
         for img in imgs:
             _,file_extension = os.path.splitext(img.filename)
             img.filename = str(uuid.uuid1()) +  file_extension
@@ -245,6 +273,7 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
         
         load_img = []
         know_encodings = []
+
         dir = os.path.join(os.getcwd(),"Compare")
         for files in os.listdir(dir):
             img = os.path.join(os.getcwd(),"Compare")
@@ -253,7 +282,34 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
             know_encodings.append(l_encod)
             load_img.append(l_img)
         
+
+        root = xml.Element('Element')
+        image_element = xml.Element('Image')
+        root.append(image_element)
+        root_images = xml.SubElement(image_element,'image')
+        root_images.text()
+        documento = xml.ElementTree(root)
+
+        with open('output.xml', 'wb') as doc:
+            documento.write(doc)
+
+        # global elementos 
+        # for files in os.listdir(dir):
+        #     with open(os.path.join(path_dir, files) , mode="rb") as file: 
+        #         # base_string = pybase64.b64encode(file.read())
+        #         root = xml.Element("User")
+        #         image_element = xml.Element("image")
+        #         image_element.text("text")
+        #         root.append(image_element)
+        #         close_element = xml.ElementTree(root)
+        #         elementos = close_element
+        
+        # with open("output.xml",'wb') as  file_xml:
+        #     elementos.write(file_xml)
+            
         # Comparacion de distances
+
+
         f_distance = face_recognition.face_distance([know_encodings[0]],know_encodings[1])
         f_match_percentage  = (1-f_distance)*100
 
@@ -264,9 +320,11 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
         pil_image = Image.fromarray(load_img[0])
         d = ImageDraw.Draw(pil_image)
 
+        
         for lendmarks in face_landmarks_list:
             for facial_feature in lendmarks.keys():
-                d.line(lendmarks[facial_feature],width=4)
+                d.point(lendmarks[facial_feature],fill='white')
+
         url = str(uuid.uuid1())        
         pil_image.save(os.getcwd() + "/Matching/" + url +".jpg")
 
@@ -282,3 +340,9 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
         return await build_response(HTTP_200_OK,detect=detect)
     except FileNotFoundError:
         return await build_response(HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# @router.post('/compareImageFaceRecognitionTwo')
+# async def compareImageFaceRecognitionTwo()
+
+#python3 -m uvicorn app.main:app  --reload

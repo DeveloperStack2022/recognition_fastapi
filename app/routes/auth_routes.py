@@ -11,10 +11,10 @@ router = APIRouter()
 
 
 @router.post('/token')
-async def login(user: LoginUser = Body(None, embed=True), grant_type: str = Body(...), refresh_token: str = Body(None)):
+async def login(user: LoginUser = Body(None, embed=True)):
     service = AuthService()
-    return await service.generate_access_token(user, grant_type, refresh_token)
-
+    return await service._login_for_access_token(user)
+    # return await service.generate_access_token(user, grant_type, refresh_token)
 
 @router.get('/auth')
 async def authenticate(token: str ):

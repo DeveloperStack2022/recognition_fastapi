@@ -1,25 +1,73 @@
+import base64
 import os 
 from fastapi import APIRouter,File,UploadFile,Form
 from fastapi.responses  import StreamingResponse
 from ..models import (UserPersistencia)
 from ..services import UserPersistenciaService
 from fastapi.responses import (JSONResponse,FileResponse)
-from ..utils import (gen_frames)
+from ..utils import (build_response, gen_frames)
 from werkzeug.utils import secure_filename
 import cv2
 import numpy as np 
 import face_recognition
+from ..utils import (verify_cedula,validarSiExisteUnArchivo,validarSiExisteUnaCarpeta)
+from starlette.status import (HTTP_400_BAD_REQUEST)
+from xml.etree.ElementTree import Element,SubElement,tostring
+import xml.etree.ElementTree as ET
 
 router = APIRouter()
 
 
+
 @router.post('/addImage')
 async def addUserPersistencia(num_cedula:str = Form(...),nombres: str = Form(...),apellidos:str = Form(...),image: UploadFile = File(...)):
+    
+    respuesta = verify_cedula(num_cedula)
+    if not respuesta:
+        return await build_response(HTTP_400_BAD_REQUEST,msg="Numero de cedula no es correcto")
     services = UserPersistenciaService()
-   
-    if not os.path.exists(os.getcwd() + "/Uploads"):
-        os.mkdir("Uploads")
-    path_dir = os.getcwd() + "/Uploads"
+
+    # file_dir = validarSiExisteUnArchivo('data_image.xml') # Verificacamos si el archivo "data_image.xml" existe / si no existe lo crea la funcion y retorna la ruta
+    # validarSiExisteUnaCarpeta("Uploads") # Verificacamos si la carpeta "Uploads" existe / si no existe lo crea la funcion.
+    # print(file_dir['path_dir'])
+    
+    # if file_dir['existe'] == 'si':
+    #     tree = ET.parse(file_dir['path_dir'])
+    #     root = tree.getroot()
+    #     data_element = Element('Data')
+    #     numero_cedula = SubElement(data_element,"numero_cedula")
+    #     nombres_element = SubElement(data_element,'nombres')
+    #     apellidos_element = SubElement(data_element,'apellidos')
+    #     image_element = SubElement(data_element,"image")
+    #     numero_cedula.text = f'{num_cedula}'    
+    #     nombres_element.text = f'{nombres}'    
+    #     apellidos_element.text = f'{apellidos}' 
+    #     image_encode = base64.standard_b64encode(image.file.read())
+    #     image_element.text = f'{image_encode}'
+    #     root.append(data_element)
+    #     tree.write(file_dir['path_dir'])
+    # else:
+    #     top_element = Element('Element')
+    #     data_element = SubElement(top_element,'Data')
+    #     num_element = SubElement(data_element,'numero_cedula')
+    #     nombres_element = SubElement(data_element,'nombres')
+    #     apellidos_element = SubElement(data_element,'apellidos')
+    #     image_element = SubElement(data_element,"image")
+
+    #     num_element.text = f'{num_cedula}'    
+    #     nombres_element.text = f'{nombres}'    
+    #     apellidos_element.text = f'{apellidos}'    
+
+    #     image_encode = base64.standard_b64encode(image.file.read())
+    #     image_element.text = f'{image_encode}'
+
+    #     xml_file = open(file_dir['path_dir'],'w')
+    #     xml_file.write(tostring(top_element).decode('utf-8'))
+    #     xml_file.close()
+
+
+    root_dir = os.getcwd()
+    path_dir = root_dir + "/Uploads"
     _,file_extension = os.path.splitext(image.filename)
     image.filename = str(num_cedula) + file_extension
     
@@ -27,8 +75,9 @@ async def addUserPersistencia(num_cedula:str = Form(...),nombres: str = Form(...
         content = await image.read() 
         myfile.write(content)
         myfile.close()
-        
+    
     images:list[str] = []
+
     images.append(str('http://localhost:8000/api/v0.1/userpersistencia/image/' + image.filename))
     user:UserPersistencia = UserPersistencia(numero_cedula=num_cedula,nombres=nombres,apellidos=apellidos,images_id=images)
     return await services.create_new_user_persistencia(user)

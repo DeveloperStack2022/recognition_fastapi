@@ -110,7 +110,7 @@ class AuthService:
         if not usr:
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,
-                detail='Incorrect email or password',
+                detail='Email o contraseña esta incorrecto',
                 headers={'Authenticate': 'Bearer'}
             )
 
@@ -118,7 +118,7 @@ class AuthService:
         if not v:
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,
-                detail='Incorrect email or password',
+                detail='Email o contraseña esta incorrecto',
                 headers={'Authenticate': 'Bearer'}
             )
 
@@ -129,14 +129,14 @@ class AuthService:
         }
 
         access, refresh = await self._create_jwt_token(payload, access_token_expires)
-
+        
         return JSONResponse(
             status_code=HTTP_200_OK,
             content={
                 'token_type': 'bearer',
-                'access_token': access,
+                'access_token': access.decode("utf-8"),
                 'expires_in': self._access_token_exp,
-                'refresh_token': refresh
+                'refresh_token': refresh.decode("utf-8")
             }
         )
 

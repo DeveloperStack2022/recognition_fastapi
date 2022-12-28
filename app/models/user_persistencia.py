@@ -38,7 +38,7 @@ class UserPersistencia(BaseUserPersistencia):
         if v is '':
              raise HTTPException(
                 status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Campo apellido es requerido"
+                detail="Apellido es requerido"
             )
         return v
 

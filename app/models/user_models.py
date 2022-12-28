@@ -11,6 +11,7 @@ from pydantic import (
 class BaseUser(BaseModel):
     email: str = Field(...)
     username: str = Field(...)
+    rol:str = Field(...)
 
 
 class User(BaseUser):
@@ -24,6 +25,16 @@ class User(BaseUser):
                 detail="Username field is required"
             )
         return v
+
+    @validator('rol')
+    def validate_rol(cls,v):
+        if v is '':
+            raise  HTTPException(
+                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="El campo rol es requerido"
+            )
+        return v
+
 
     @validator('email')
     def validate_email(cls, v):

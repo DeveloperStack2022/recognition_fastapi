@@ -57,6 +57,64 @@ def createDir(nameDir:str) -> str:
         os.makedirs(str(nameDir))
     return FOLDER
 
+def verify_cedula(num:str) -> bool:
+    indice = 0
+    validation = True
+    resultado:list = []
+    ultimoValor = num[9]
+    total = 0
+    while indice < len(num) - 1:
+        numero:int = int(num[indice])
+        # print(f'{numero} \n')
+        if validation:
+            res = numero * 2
+            if res > 9:
+                res = res - 9 
+            resultado.append(res)
+            validation = False
+        else:
+            res = numero * 1
+            resultado.append(res)
+            validation = True
+        indice += 1
+    
+    for numero in resultado:
+        total = total + numero
+
+    valorString = str(total)[0]
+    decena = ( int(valorString) + 1 ) * 10 
+    digito_validador = decena - total
+
+    if digito_validador == int(ultimoValor):
+        return True
+    else:
+        return False
+
+def validarSiExisteUnArchivo(nombre_archivo:str) -> str:
+
+    dir_folder = os.path.join(os.getcwd(),"app/files")
+    path_dir = os.path.join(os.getcwd(),f"app/files/{nombre_archivo}")
+
+    if not os.path.exists(path_dir):
+        os.makedirs(dir_folder)
+        with open(path_dir,'w')  as file:
+            pass   
+        return { "path_dir":str(path_dir),"existe":'no'} 
+    return {
+        "path_dir":str(path_dir),
+        "existe":'si'
+    }
+
+def validarSiExisteUnaCarpeta(nombre_carpeta:str) -> str:
+    root_path = os.getcwd()
+    dir_path = os.path.join(root_path,f"{nombre_carpeta}")
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+        return "The folder has been created"
+    return "The folder already existed"
+
+
+
 know_face_encodings = []
 know_faces_name = []
 
