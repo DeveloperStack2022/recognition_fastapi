@@ -26,7 +26,8 @@ async def addUserPersistencia(num_cedula:str = Form(...),nombres: str = Form(...
     if not respuesta:
         return await build_response(HTTP_400_BAD_REQUEST,msg="Numero de cedula no es correcto")
     services = UserPersistenciaService()
-
+    
+    # print(image.file.read())
     # file_dir = validarSiExisteUnArchivo('data_image.xml') # Verificacamos si el archivo "data_image.xml" existe / si no existe lo crea la funcion y retorna la ruta
     # validarSiExisteUnaCarpeta("Uploads") # Verificacamos si la carpeta "Uploads" existe / si no existe lo crea la funcion.
     # print(file_dir['path_dir'])
@@ -66,21 +67,21 @@ async def addUserPersistencia(num_cedula:str = Form(...),nombres: str = Form(...
     #     xml_file.close()
 
 
-    root_dir = os.getcwd()
-    path_dir = root_dir + "/Uploads"
-    _,file_extension = os.path.splitext(image.filename)
-    image.filename = str(num_cedula) + file_extension
+    # root_dir = os.getcwd()
+    # path_dir = root_dir + "/Uploads"
+    # _,file_extension = os.path.splitext(image.filename)
+    # image.filename = str(num_cedula) + file_extension
     
-    with open(os.path.join(path_dir,image.filename),'wb') as myfile:
-        content = await image.read() 
-        myfile.write(content)
-        myfile.close()
+    # with open(os.path.join(path_dir,image.filename),'wb') as myfile:
+    #     content = await image.read() 
+    #     myfile.write(content)
+    #     myfile.close()
     
-    images:list[str] = []
-
-    images.append(str('http://localhost:8000/api/v0.1/userpersistencia/image/' + image.filename))
-    user:UserPersistencia = UserPersistencia(numero_cedula=num_cedula,nombres=nombres,apellidos=apellidos,images_id=images)
-    return await services.create_new_user_persistencia(user)
+    # images:list[str] = []
+    # print(image.file.read())
+    # images.append(str('http://localhost:8000/api/v0.1/userpersistencia/image/' + image.filename))
+    user:UserPersistencia = UserPersistencia(numero_cedula=num_cedula,nombres=nombres,apellidos=apellidos,images_id=[''])
+    return await services.create_user_image_file(user,image)
 
 @router.get('/get_users')
 async def getUsersPersistencia():

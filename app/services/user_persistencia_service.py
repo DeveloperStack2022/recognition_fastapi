@@ -10,6 +10,8 @@ from starlette.status import (
     HTTP_204_NO_CONTENT
 )
 from starlette.responses import JSONResponse
+from fastapi import File,UploadFile
+import base64
 
 class UserPersistenciaService:
     def __init__(self):
@@ -64,3 +66,11 @@ class UserPersistenciaService:
                 'payload':OutUserPersistencia(**user).dict()
             }
         )
+    
+    async def create_user_image_file(self,user:UserPersistencia,file:UploadFile = File(...)):
+        user_persistencia_dict:dict = user.dict()
+        
+        _ = await self._db.create_user_with_file(user_persistencia_dict,file)
+
+        return await build_response(HTTP_201_CREATED,msg="Usuario creado exitosamente")
+       

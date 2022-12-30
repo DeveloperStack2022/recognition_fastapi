@@ -1,6 +1,6 @@
 import logging
-
 from pymongo import MongoClient
+
 
 from ..configs import MONGO_URL, MONGO_TIMEOUT
 
