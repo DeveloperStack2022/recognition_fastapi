@@ -2,6 +2,7 @@ import base64
 import logging
 from fastapi import File,UploadFile
 from fastapi.exceptions import HTTPException
+from PIL import Image
 from starlette.status import (
     HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR
@@ -28,10 +29,11 @@ class MongoDB:
         self._client: MongoClient = client
         self._db = None
         self._coll = None
-
+        self._gridfs = None
         try:
             self._client.server_info()
             self._db = self._client[MONGO_DB_NAME]
+            self._gridfs = gridfs.GridFS(self._db)
 
             # Collections Mongodb
             self._coll = self._db[MONGO_USERS_COLLECTION]
@@ -209,11 +211,13 @@ class MongoDB:
                     status_code=HTTP_409_CONFLICT,
                     detail="Este usuario ya esta registrado"
                 )
-        fs = gridfs.GridFS(self._db)
+        fs = self._gridfs
         #convert to base64
         encoded_base64 = base64.standard_b64encode(file.file.read())
         numero_cedula = user['numero_cedula']
-        file_fs = fs.put(encoded_base64,file_name=str(numero_cedula))
+        img = Image.open(file.file)
+        width, height = img.size
+        file_fs = fs.put(encoded_base64,file_name=str(numero_cedula),sizeX=width,sizeY=height)
         user['file'] = file_fs
         try:
             id = self._coll_pers.insert_one(user).inserted_id
@@ -223,4 +227,14 @@ class MongoDB:
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Mongo Db Error"
             )
-        
+
+    def get_images_user(self,numero_cedula:str):
+        # print(numero_cedula)
+        fs = self._gridfs 
+        user_images = fs.find({"file_name":numero_cedula})
+        # file = user_image.read()
+        imagelist = []
+        for image in user_images:
+            read_base64 = image.read()
+            imagelist.append({'image_base64':read_base64,"sizeX":image.sizeX,"sizeY":image.sizeY})
+        return imagelist

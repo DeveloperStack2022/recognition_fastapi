@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from http.client import HTTPException
 from ..utils import build_response
 from ..db import (MongoDB,get_client)
-from ..models.user_persistencia import (UserPersistencia,OutUserPersistencia,UpdateUserPersistencia)
+from ..models.user_persistencia import (UserPersistencia,OutUserPersistencia,UpdateUserPersistencia,OutUserImageGridfs)
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -17,7 +17,7 @@ class UserPersistenciaService:
     def __init__(self):
         super().__init__()
         self._db = MongoDB(get_client())
-    
+
     async def create_new_user_persistencia(self,user:UserPersistencia):
         user_persistencia_dict:dict = user.dict()
 
@@ -27,7 +27,6 @@ class UserPersistenciaService:
     
     async def get_users_persistencia(self):
         users = await self._db.get_user_persistencia()
-        # items = jsonable_encoder(users)
         userList = [OutUserPersistencia(**user) for user in users]
         if users:
            return JSONResponse(
@@ -37,7 +36,7 @@ class UserPersistenciaService:
                 'payload': jsonable_encoder(userList)
             },
         )
-
+        
     async def delete_user_persistencia(self,numero_cedula:str):
         user = await self._db.delete_user_persistencia(numero_cedula)
 
@@ -74,3 +73,16 @@ class UserPersistenciaService:
 
         return await build_response(HTTP_201_CREATED,msg="Usuario creado exitosamente")
        
+    async def get_image_user_gridfs(self,numero_cedula:str):
+        data = self._db.get_images_user(numero_cedula)
+        lista = []
+        for res in data:
+            lista.append({"image_base64":res['image_base64'],"sizeX":res['sizeX'],"sizeY":res['sizeY'],'numero_cedula':numero_cedula})
+        data_list = [OutUserImageGridfs(**user) for user in lista]
+        return JSONResponse(
+            status_code=HTTP_200_OK,
+            content={
+                "success":True,
+                'payload':jsonable_encoder(data_list)
+            }
+        )

@@ -4,6 +4,7 @@ from typing import List,Optional
 from pydantic.class_validators import validator   
 from pydantic import (BaseModel,Field)
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from bson.objectid import ObjectId
 
 class BaseUserPersistencia(BaseModel):
     numero_cedula:str = Field(...)
@@ -55,9 +56,27 @@ class UpdateUserPersistencia(BaseModel):
     images_id: Optional[list] = None
     disable: Optional[bool] = None
 
+class PydanticObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, ObjectId):
+            raise TypeError('ObjectId required')
+        return str(v)
+
 class OutUserPersistencia(BaseModel):
+    file:PydanticObjectId = Field(...)
     numero_cedula:str = Field(...)
     nombres:str = Field(...)
     apellidos:str = Field(...)
     images_id:List[str] = Field(...)
     disabled:bool = Field(...)
+
+class OutUserImageGridfs(BaseModel):
+    numero_cedula:str = Field(...)
+    image_base64:str = Field(...)
+    sizeX:int = Field(...)
+    sizeY:int = Field(...)

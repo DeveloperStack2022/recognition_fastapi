@@ -158,3 +158,13 @@ def generate():
 async def detectFaceRecognetion():
     face_r()
     return StreamingResponse(generate(),media_type="multipart/x-mixed-replace;boundary=frame")
+
+
+@router.get("/get_user_image")
+async def get_image_user_gridfs(numero_cedula:str):
+    services = UserPersistenciaService()
+    # for ser in response_bd:
+    #     # print(ser)
+    # return {"ok":"success"}
+    # response_bd = await services.get_image_user_gridfs(numero_cedula)
+    return await services.get_image_user_gridfs(numero_cedula)
