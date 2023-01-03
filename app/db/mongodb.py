@@ -147,15 +147,16 @@ class MongoDB:
     async def get_user_persistencia(self):
         try:
             users = self._coll_pers.find({"disabled":False})
-            # print(list(users))
+            # users = self._coll_pers.find({"disabled":False}).populate([{
+            #     'path':'file',
+            #     'populate':{
+            #         'path':'file_id',
+            #         'model':'fs.files'
+            #     }
+            # }])
             if not users:
                 return False
-       
             return list(users)
-            # for u in users:
-            #     return u
-
-            # return False
         except PyMongoError:
             raise HTTPException(
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
@@ -218,7 +219,8 @@ class MongoDB:
         img = Image.open(file.file)
         width, height = img.size
         file_fs = fs.put(encoded_base64,file_name=str(numero_cedula),sizeX=width,sizeY=height)
-        user['file'] = file_fs
+        # array = [list(i) for i in user.items()]
+        user['file'] = [file_fs]
         try:
             id = self._coll_pers.insert_one(user).inserted_id
             return str(id)

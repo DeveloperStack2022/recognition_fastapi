@@ -67,13 +67,19 @@ class PydanticObjectId(ObjectId):
             raise TypeError('ObjectId required')
         return str(v)
 
+class File_Type(BaseModel):
+    image_base64:str = Field(...)
+    sizeX:int = Field(...)
+    sizeY:int = Field(...)
+    file_id:PydanticObjectId = Field(...)
+
 class OutUserPersistencia(BaseModel):
-    file:PydanticObjectId = Field(...)
     numero_cedula:str = Field(...)
     nombres:str = Field(...)
     apellidos:str = Field(...)
-    images_id:List[str] = Field(...)
     disabled:bool = Field(...)
+    file:list[PydanticObjectId] = Field(...)
+    # file:list[File_Type] = Field(...)
 
 class OutUserImageGridfs(BaseModel):
     numero_cedula:str = Field(...)
