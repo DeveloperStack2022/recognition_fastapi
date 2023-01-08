@@ -103,9 +103,7 @@ async def file(name_file:str):
     path = os.getcwd() + "/uploads/" + name_file
     return FileResponse(path)
 
-cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
-face_detector = cv2.CascadeClassifier(cv2.data.haarcascades +
-     "haarcascade_frontalface_default.xml")
+
 
 know_faces_name = []
 know_face_encodings = []
@@ -125,6 +123,9 @@ def face_r():
         know_faces_name.append(file_name.split('.')[0])
 
 def generate():
+    cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+    face_detector = cv2.CascadeClassifier(cv2.data.haarcascades +
+     "haarcascade_frontalface_default.xml")
     while True:
         success, frame = cap.read()
         if not success:
@@ -163,8 +164,4 @@ async def detectFaceRecognetion():
 @router.get("/get_user_image")
 async def get_image_user_gridfs(numero_cedula:str):
     services = UserPersistenciaService()
-    # for ser in response_bd:
-    #     # print(ser)
-    # return {"ok":"success"}
-    # response_bd = await services.get_image_user_gridfs(numero_cedula)
     return await services.get_image_user_gridfs(numero_cedula)

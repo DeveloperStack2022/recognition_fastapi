@@ -53,7 +53,7 @@ class UpdateUserPersistencia(BaseModel):
     numero_cedula: Optional[str] = None
     nombres:Optional[str] = None
     apellidos:Optional[str] = None
-    images_id: Optional[list] = None
+    # images_id: Optional[list] = None
     disable: Optional[bool] = None
 
 class PydanticObjectId(ObjectId):

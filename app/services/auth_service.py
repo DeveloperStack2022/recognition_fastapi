@@ -123,9 +123,11 @@ class AuthService:
             )
 
         access_token_expires = timedelta(minutes=self._access_token_exp)
+        created_token = datetime.now()
+
         payload = {
-            'id': str(usr.get('id')),
-            'usr': usr.get('email')
+            'usr': usr.get('email'),
+            'created_at': str(created_token)
         }
 
         access, refresh = await self._create_jwt_token(payload, access_token_expires)

@@ -1,4 +1,5 @@
 """ Modulos """
+from io import BytesIO
 from fastapi import APIRouter,UploadFile,File
 import os
 import numpy as np
@@ -6,8 +7,6 @@ import cv2
 from PIL import Image, ImageDraw
 import face_recognition
 import  xml.etree.ElementTree as xml 
-
-
 from ..utils import build_response
 from starlette.status import (
     HTTP_200_OK,
@@ -15,6 +14,10 @@ from starlette.status import (
 )
 import uuid
 from fastapi.responses import (JSONResponse,FileResponse)
+from ..services import UserPersistenciaService
+import base64
+from PIL import Image
+from io import BytesIO
 
 router = APIRouter()
 
@@ -278,20 +281,22 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
         for files in os.listdir(dir):
             img = os.path.join(os.getcwd(),"Compare")
             l_img = face_recognition.load_image_file(str(img + "/" + files))
+            # print(l_img)
             l_encod = face_recognition.face_encodings(l_img)[0]
+            print(l_encod)
             know_encodings.append(l_encod)
             load_img.append(l_img)
         
 
-        root = xml.Element('Element')
-        image_element = xml.Element('Image')
-        root.append(image_element)
-        root_images = xml.SubElement(image_element,'image')
-        root_images.text()
-        documento = xml.ElementTree(root)
+        # root = xml.Element('Element')
+        # image_element = xml.Element('Image')
+        # root.append(image_element)
+        # root_images = xml.SubElement(image_element,'image')
+        # root_images.text()
+        # documento = xml.ElementTree(root)
 
-        with open('output.xml', 'wb') as doc:
-            documento.write(doc)
+        # with open('output.xml', 'wb') as doc:
+        #     documento.write(doc)
 
         # global elementos 
         # for files in os.listdir(dir):
@@ -342,7 +347,43 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
         return await build_response(HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# @router.post('/compareImageFaceRecognitionTwo')
-# async def compareImageFaceRecognitionTwo()
+@router.post('/compareImageFaceRecognitionTwo')
+async def compareImageFaceRecognitionTwo(image_compare:UploadFile = File(...)):
+    service = UserPersistenciaService()
+    data = service.all_get_images_gridfs()
+    direct = os.path.join(os.getcwd(),'Compare')
+    im = Image.open(image_compare.file)
+    # if im.mode in ("RGBA","p")
+    im.save(str(direct +"/"+ image_compare.filename),quality=50)
+
+    load_image = face_recognition.load_image_file(str(direct+"/"+image_compare.filename))
+    encoding_image = face_recognition.face_encodings(load_image)[0]
+
+    load_image_file = []
+    face_encoding_image = []
+    list_users = [] 
+    
+    for file_ in data:
+        img_IO = BytesIO(base64.standard_b64decode(file_['image_base64']))
+        img_pil = Image.open(img_IO)
+        img_pil = img_pil.convert('RGB')
+        load_image = np.array(img_pil)
+        face_encoding = face_recognition.face_encodings(load_image)[0]
+        load_image_file.append(load_image)
+        face_encoding_image.append(face_encoding)
+        list_users.append(file_['file_name'])
+    
+    match = face_recognition.compare_faces(face_encoding_image,encoding_image,tolerance=0.5)
+    user = ''
+    f_distance = face_recognition.face_distance(face_encoding_image,encoding_image)
+    f_match_percentage  = (1-f_distance)*100
+    val = np.round(f_match_percentage,2)
+    for index,match_ in enumerate(match): 
+        if match_: 
+            user = list_users[index]
+    
+    service_data = service.get_user_by_numero_cedula(numero_cedula=user,valor_porcentaje=val.max())
+    return service_data
+
 
 #python3 -m uvicorn app.main:app  --reload

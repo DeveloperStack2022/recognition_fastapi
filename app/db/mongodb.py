@@ -147,13 +147,13 @@ class MongoDB:
     async def get_user_persistencia(self):
         try:
             users = self._coll_pers.find({"disabled":False})
-            # users = self._coll_pers.find({"disabled":False}).populate([{
+            # self._coll_pers.find({"disabled":False}).populate([{
             #     'path':'file',
             #     'populate':{
-            #         'path':'file_id',
-            #         'model':'fs.files'
+            #         'path':'',
+            #         'models':'fs.files'
             #     }
-            # }])
+            #     }])
             if not users:
                 return False
             return list(users)
@@ -175,9 +175,9 @@ class MongoDB:
                 detail="PyMongo DB delete error"
             )
     
-    async def get_user_by_numero_cedula(self,numero_cedula:str):
+    def get_user_by_numero_cedula(self,numero_cedula:str):
         try:
-            user = self._coll_pers.find_one({"numero_cedula":numero_cedula})
+            user =  self._coll_pers.find_one({"numero_cedula":numero_cedula})
             return user
         except PyMongoError:
             raise HTTPException(
@@ -205,13 +205,15 @@ class MongoDB:
             )
 
     async def create_user_with_file(self,user:dict,file:UploadFile = File(...)):
-        users = self._coll_pers.find({'numero_cedula':user['numero_cedula']})
-        for u  in users:
-            if user['numero_cedula'] in u.values():
-                raise HTTPException(
-                    status_code=HTTP_409_CONFLICT,
-                    detail="Este usuario ya esta registrado"
-                )
+        # print(self._db.list_collection_names())
+        # if MONGO_USER_PERSISTENCIA_COLLECTION in self._db.list_collection_names():
+        #     users = self._coll_pers.find({'numero_cedula':user['numero_cedula']})
+        #     for u  in users:
+        #         if user['numero_cedula'] in u.values():
+        #             raise HTTPException(
+        #                 status_code=HTTP_409_CONFLICT,
+        #                 detail="Este usuario ya esta registrado"
+        #             )
         fs = self._gridfs
         #convert to base64
         encoded_base64 = base64.standard_b64encode(file.file.read())
@@ -240,3 +242,13 @@ class MongoDB:
             read_base64 = image.read()
             imagelist.append({'image_base64':read_base64,"sizeX":image.sizeX,"sizeY":image.sizeY})
         return imagelist
+    
+    def all_images_user(self):
+        fs = self._gridfs
+        user_images = fs.find()
+        image_lists = [] 
+        for image in user_images:
+            read_base64 = image.read()
+            image_lists.append({'image_base64':read_base64,"file_name":image.file_name})
+        return image_lists
+    

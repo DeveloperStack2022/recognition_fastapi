@@ -86,3 +86,26 @@ class UserPersistenciaService:
                 'payload':jsonable_encoder(data_list)
             }
         )
+    def all_get_images_gridfs(self):
+        data = self._db.all_images_user()
+        lista = []
+        for file_ in data:
+            # print(file_['file_name'])
+            lista.append({"image_base64":file_['image_base64'],"file_name":file_['file_name']})
+        return lista
+    
+
+    def get_user_by_numero_cedula(self,numero_cedula:str,valor_porcentaje:float):
+        data =  self._db.get_user_by_numero_cedula(numero_cedula=numero_cedula)
+        return JSONResponse(
+            status_code=HTTP_200_OK,
+            content={
+                'success':True,
+                'payload':{
+                    'numero_cedula':data['numero_cedula'],
+                    'nombres': data['nombres'],
+                    'apellidos':data['apellidos'],
+                    'valor_match':str(valor_porcentaje)
+                }
+            }
+        )

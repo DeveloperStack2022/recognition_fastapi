@@ -18,8 +18,8 @@ MONGO_TIMEOUT = 1000
 
 SECRET_KEY = config('SECRET_KEY', cast=str, default='09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7')
 ALGORITHM = config('ALGORITHM', cast=str, default='HS256')
-ACCESS_TOKEN_EXP = config('ACCESS_TOKEN_EXP', cast=int, default=60*24)
-REFRESH_TOKEN_EXP = config('REFRESH_TOKEN_EXP', cast=int, default=60*24*30)
+ACCESS_TOKEN_EXP = config('ACCESS_TOKEN_EXP', cast=int, default=15*1)
+REFRESH_TOKEN_EXP = config('REFRESH_TOKEN_EXP', cast=int, default=15*1)
 
 PATH_FILENAME = config('PATH_FILENAME',cast=str,default="Uploads")
 
