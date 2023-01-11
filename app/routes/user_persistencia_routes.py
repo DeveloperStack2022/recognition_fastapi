@@ -13,16 +13,33 @@ import face_recognition
 from ..utils import (verify_cedula,validarSiExisteUnArchivo,validarSiExisteUnaCarpeta)
 from starlette.status import (HTTP_400_BAD_REQUEST)
 from xml.etree.ElementTree import Element,SubElement,tostring
-import xml.etree.ElementTree as ET
+from datetime import date,datetime
 
 router = APIRouter()
 
 
 
 @router.post('/addImage')
-async def addUserPersistencia(num_cedula:str = Form(...),nombres: str = Form(...),apellidos:str = Form(...),image: UploadFile = File(...)):
+async def addUserPersistencia(cedula:str = Form(...),nombres: str = Form(...),condicion_cedulado:str = Form(default=""),
+    fecha_nacimiento:datetime =  Form(default=datetime.now()),
+    lugar_ins_nacimiento:str = Form(default=""),
+    anio_ins_nacimiento:str = Form(default=""),
+    nacionalidad:str = Form(default=""),
+    codigo_dactilar:str = Form(default=""),
+    estado_civil:str = Form(default=""),
+    conyuge:str = Form(default=""),
+    instruccion:str = Form(default=""),
+    profession:str = Form(default=""),
+    nombre_padre:str = Form(default=""),
+    nacionalidad_padre:str = Form(default=""),
+    nombre_madre:str = Form(default=""),
+    nacionalidad_madre:str = Form(default=""),
+    domicilio:str = Form(default=""),
+    calles_domicilio:str = Form(default=""),
+    doble_nacionalidad:str = Form(default=""),
+    image: UploadFile = File(...)):
     
-    respuesta = verify_cedula(num_cedula)
+    respuesta = verify_cedula(cedula)
     if not respuesta:
         return await build_response(HTTP_400_BAD_REQUEST,msg="Numero de cedula no es correcto")
     services = UserPersistenciaService()
@@ -80,7 +97,7 @@ async def addUserPersistencia(num_cedula:str = Form(...),nombres: str = Form(...
     # images:list[str] = []
     # print(image.file.read())
     # images.append(str('http://localhost:8000/api/v0.1/userpersistencia/image/' + image.filename))
-    user:UserPersistencia = UserPersistencia(numero_cedula=num_cedula,nombres=nombres,apellidos=apellidos,images_id=[''])
+    user:UserPersistencia = UserPersistencia(numero_cedula=cedula,nombres=nombres,anio_ins_nacimiento=anio_ins_nacimiento,images_id=[''],calles_domicilio=calles_domicilio,codigo_dactilar=codigo_dactilar,condicion_cedulado=condicion_cedulado,conyuge=conyuge,doble_nacionalidad=doble_nacionalidad,domicilio=domicilio,estado_civil=estado_civil,fecha_nacimiento=fecha_nacimiento,instruccion=instruccion,lugar_ins_nacimiento=lugar_ins_nacimiento,nacionalidad=nacionalidad,nacionalidad_madre=nacionalidad_madre,nacionalidad_padre=nacionalidad_padre,nombre_madre=nombre_madre,nombre_padre=nombre_padre,profession=profession)
     return await services.create_user_image_file(user,image)
 
 @router.get('/get_users')

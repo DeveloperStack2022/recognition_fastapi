@@ -5,11 +5,28 @@ from pydantic.class_validators import validator
 from pydantic import (BaseModel,Field)
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 from bson.objectid import ObjectId
+from datetime import date,datetime
 
 class BaseUserPersistencia(BaseModel):
     numero_cedula:str = Field(...)
     nombres:str = Field(...)
-    apellidos:str = Field(...)
+    condicion_cedulado:str = Field(...)
+    fecha_nacimiento:datetime 
+    lugar_ins_nacimiento:str = Field(...)
+    anio_ins_nacimiento:str = Field(...)
+    nacionalidad:str = Field(...)
+    codigo_dactilar:str = Field(...)
+    estado_civil:str = Field(...)
+    conyuge:str = Field(...)
+    instruccion:str = Field(...)
+    profession:str = Field(...)
+    nombre_padre:str = Field(...)
+    nacionalidad_padre:str = Field(...)
+    nombre_madre:str = Field(...)
+    nacionalidad_madre:str = Field(...)
+    domicilio:str = Field(...)
+    calles_domicilio:str = Field(...)
+    doble_nacionalidad:str = Field(...)
     images_id:List[str] = Field(...)
     disabled:bool = Field(default=False)
 
@@ -33,20 +50,27 @@ class UserPersistencia(BaseUserPersistencia):
                 detail="Nombres es requerido"
             )
         return v
-    
-    @validator("apellidos")
-    def validate_apellidos(cls,v):
-        if v is '':
-             raise HTTPException(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Apellido es requerido"
-            )
-        return v
 
 class AddUserPersistencia(BaseModel):
     numero_cedula:str
     nombres:str
-    apellidos:str
+    condicion_cedulado:str
+    fecha_nacimiento:datetime
+    lugar_ins_nacimiento:str
+    anio_ins_nacimiento:str
+    nacionalidad:str
+    codigo_dactilar:str
+    estado_civil:str
+    conyuge:str
+    instruccion:str
+    profession:str
+    nombre_padre:str
+    nacionalidad_padre:str
+    nombre_madre:str
+    nacionalidad_madre:str
+    domicilio:str
+    calles_domicilio:str
+    doble_nacionalidad:str
     images_id:List[str]
 
 class UpdateUserPersistencia(BaseModel):
@@ -76,7 +100,7 @@ class File_Type(BaseModel):
 class OutUserPersistencia(BaseModel):
     numero_cedula:str = Field(...)
     nombres:str = Field(...)
-    apellidos:str = Field(...)
+    apellidos:str = Field(default="")
     disabled:bool = Field(...)
     file:list[PydanticObjectId] = Field(...)
     # file:list[File_Type] = Field(...)

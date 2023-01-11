@@ -104,7 +104,7 @@ class UserPersistenciaService:
                 'payload':{
                     'numero_cedula':data['numero_cedula'],
                     'nombres': data['nombres'],
-                    'apellidos':data['apellidos'],
+                    'apellidos':"",
                     'valor_match':str(valor_porcentaje)
                 }
             }

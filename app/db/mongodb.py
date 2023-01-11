@@ -205,15 +205,13 @@ class MongoDB:
             )
 
     async def create_user_with_file(self,user:dict,file:UploadFile = File(...)):
-        # print(self._db.list_collection_names())
-        # if MONGO_USER_PERSISTENCIA_COLLECTION in self._db.list_collection_names():
-        #     users = self._coll_pers.find({'numero_cedula':user['numero_cedula']})
-        #     for u  in users:
-        #         if user['numero_cedula'] in u.values():
-        #             raise HTTPException(
-        #                 status_code=HTTP_409_CONFLICT,
-        #                 detail="Este usuario ya esta registrado"
-        #             )
+        users = self._coll_pers.find({'numero_cedula':user['numero_cedula']})
+        for u in users:
+            if user['numero_cedula'] in u.values():
+                raise HTTPException(
+                    status_code=HTTP_409_CONFLICT,
+                    detail="Este usuario ya esta registrado"
+                )
         fs = self._gridfs
         #convert to base64
         encoded_base64 = base64.standard_b64encode(file.file.read())
