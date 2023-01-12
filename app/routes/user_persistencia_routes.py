@@ -2,6 +2,8 @@ import base64
 import os 
 from fastapi import APIRouter,File,UploadFile,Form
 from fastapi.responses  import StreamingResponse
+
+from app.services import user_persistencia_service
 from ..models import (UserPersistencia)
 from ..services import UserPersistenciaService
 from fastapi.responses import (JSONResponse,FileResponse)
@@ -14,6 +16,8 @@ from ..utils import (verify_cedula,validarSiExisteUnArchivo,validarSiExisteUnaCa
 from starlette.status import (HTTP_400_BAD_REQUEST)
 from xml.etree.ElementTree import Element,SubElement,tostring
 from datetime import date,datetime
+
+from app import services
 
 router = APIRouter()
 
@@ -182,3 +186,8 @@ async def detectFaceRecognetion():
 async def get_image_user_gridfs(numero_cedula:str):
     services = UserPersistenciaService()
     return await services.get_image_user_gridfs(numero_cedula)
+
+@router.get('/getUserByNumeroCedula/{numero_cedula}')
+async def getUserByNumeroCedula(numero_cedula:str):
+    services = UserPersistenciaService()
+    return  services.get_user_by_numero_cedula_all_data(numero_cedula=numero_cedula)

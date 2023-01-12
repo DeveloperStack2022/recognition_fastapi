@@ -110,3 +110,6 @@ class OutUserImageGridfs(BaseModel):
     image_base64:str = Field(...)
     sizeX:int = Field(...)
     sizeY:int = Field(...)
+
+class OutUserImageBase64(BaseModel):
+    image_base64:str = Field(...)

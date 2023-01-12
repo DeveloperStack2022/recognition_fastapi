@@ -3,6 +3,7 @@ import logging
 from fastapi import File,UploadFile
 from fastapi.exceptions import HTTPException
 from PIL import Image
+from pydantic import (Field)
 from starlette.status import (
     HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR
@@ -12,14 +13,13 @@ from pymongo.errors import PyMongoError
 from pymongo import (
     MongoClient,
     ReturnDocument
-
 )
 from ..configs import (
     MONGO_DB_NAME,
     MONGO_USERS_COLLECTION,
     MONGO_USER_PERSISTENCIA_COLLECTION,
-    MONGO_USER_DETECT_COLLECTION
-
+    MONGO_USER_DETECT_COLLECTION,
+    PAGE_LIMIT
 )
 import gridfs
 
@@ -144,16 +144,51 @@ class MongoDB:
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="PyMongo DB error"
             )
-    async def get_user_persistencia(self):
+    async def get_user_persistencia(self,numero_page:int):
         try:
-            users = self._coll_pers.find({"disabled":False})
-            # self._coll_pers.find({"disabled":False}).populate([{
-            #     'path':'file',
-            #     'populate':{
-            #         'path':'',
-            #         'models':'fs.files'
-            #     }
-            #     }])
+            """ 
+                Example:
+                Data --------- 
+                    {'name': 'Audi', '_id': ObjectId('5b41eb21b9c5d915989d48a8')}
+                    {'name': 'Mercedes', '_id': ObjectId('5b41eb21b9c5d915989d48a9')}
+                    {'name': 'Skoda', '_id': ObjectId('5b41eb21b9c5d915989d48aa')}
+                    {'name': 'Volvo', '_id': ObjectId('5b41eb21b9c5d915989d48ab')}
+                    {'name': 'Bentley', '_id': ObjectId('5b41eb21b9c5d915989d48ac')}
+                    {'name': 'Citroen', '_id': ObjectId('5b41eb21b9c5d915989d48ad')}
+                    {'name': 'Hummer', '_id': ObjectId('5b41eb21b9c5d915989d48ae')}
+                    {'name': 'Volkswagen', '_id': ObjectId('5b41eb21b9c5d915989d48af')}
+                End Data --------
+                    .skip() -> De donde va iniciar. 
+                    .limit() -> Donde va terminar.
+                    db.collection.find().skip(2).limit(3)
+
+                    Output: 
+                        Element 1: {'name': 'Skoda', '_id': ObjectId('5b41eb21b9c5d915989d48aa')}
+                        Element 2: {'name': 'Volvo', '_id': ObjectId('5b41eb21b9c5d915989d48ab')}
+                        Element 3: {'name': 'Bentley', '_id': ObjectId('5b41eb21b9c5d915989d48ac')}
+                
+                Nota:
+                    - Una page tiene 10 registro (n*10)
+                        - por ejemplo si vamos a pagina 1(uno) seria el calculo asi .skip(10 * (1 - 1)).limit(10) | .skip(10 * 0).limit(10) 
+                            -Empieza en el registro 0 y termina en el registro 10
+                    - Pagina numero 2 seria de la 10 - 20 registro 
+                        - por ejemplo si vamos a la pagina 2(dos) seria calculado asi .skip(10 * (2-1)).limit(10) | .skip(10 * 1 ).limit(10) | .skip(10).limit(10)
+                    - Pagina numero 2 seria de la 20 - 30 registro 
+                        - por ejemplo si vamos a la pagina 3(dos) seria calculado asi .skip(10 * (3-1)).limit(10) | .skip(10 * 2 ).limit(10) | .skip(20).limit(10)
+
+                .skip(page_limit_ * (page - 1)).limit(page_limit_)
+                .skip(10 * (8 - 1)).limit(10)
+                .skip(10 * 9).limit(10)
+                .skip(90).limit(10)
+            """
+            page_limit_ = PAGE_LIMIT
+            n_documents_:int = self._coll_pers.count_documents({})
+            if int(n_documents_) >  int(page_limit_) * (numero_page - 1): # 10 * (2 - 1) => 10 * 1 = 10  | si n_documents_ > 10 ?  True : false
+                users = self._coll_pers.find({"disabled":False}).skip(int(page_limit_) * (numero_page - 1)).limit(int(page_limit_))
+            else:
+                numero_page_ = 1
+                users = self._coll_pers.find({"disabled":False}).skip(int(page_limit_) * (numero_page_ - 1)).limit(int(page_limit_))
+            # users = self._coll_pers.find({"disabled":False}).skip(0).limit(10)
             if not users:
                 return False
             return list(users)
@@ -178,6 +213,16 @@ class MongoDB:
     def get_user_by_numero_cedula(self,numero_cedula:str):
         try:
             user =  self._coll_pers.find_one({"numero_cedula":numero_cedula})
+            return user
+        except PyMongoError:
+            raise HTTPException(
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="PyMongo DB Error al buscar el usuario"
+            )
+    #
+    def get_user_by_numero_cedula_all_data(self,numero_cedula:str):
+        try:
+            user = self._coll_pers.find_one({'numero_cedula':numero_cedula})
             return user
         except PyMongoError:
             raise HTTPException(
