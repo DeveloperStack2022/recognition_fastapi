@@ -131,14 +131,14 @@ class AuthService:
         }
 
         access, refresh = await self._create_jwt_token(payload, access_token_expires)
-        
+        print(access)
         return JSONResponse(
             status_code=HTTP_200_OK,
             content={
                 'token_type': 'bearer',
-                'access_token': access.decode("utf-8"),
+                'access_token': access,
                 'expires_in': self._access_token_exp,
-                'refresh_token': refresh.decode("utf-8")
+                'refresh_token': refresh
             }
         )
 

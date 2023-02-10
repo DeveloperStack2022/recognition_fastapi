@@ -16,12 +16,9 @@ from ..utils import (verify_cedula,validarSiExisteUnArchivo,validarSiExisteUnaCa
 from starlette.status import (HTTP_400_BAD_REQUEST)
 from xml.etree.ElementTree import Element,SubElement,tostring
 from datetime import date,datetime
-
-from app import services
+from ..middlewares.verify_token import VerifyTokenRoute
 
 router = APIRouter()
-
-
 
 @router.post('/addImage')
 async def addUserPersistencia(cedula:str = Form(...),nombres: str = Form(...),condicion_cedulado:str = Form(default=""),
@@ -124,8 +121,6 @@ async def file(name_file:str):
     path = os.getcwd() + "/uploads/" + name_file
     return FileResponse(path)
 
-
-
 know_faces_name = []
 know_face_encodings = []
 
@@ -180,7 +175,6 @@ def generate():
 async def detectFaceRecognetion():
     face_r()
     return StreamingResponse(generate(),media_type="multipart/x-mixed-replace;boundary=frame")
-
 
 @router.get("/get_user_image")
 async def get_image_user_gridfs(numero_cedula:str):

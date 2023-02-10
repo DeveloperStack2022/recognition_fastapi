@@ -283,7 +283,6 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
             l_img = face_recognition.load_image_file(str(img + "/" + files))
             # print(l_img)
             l_encod = face_recognition.face_encodings(l_img)[0]
-            print(l_encod)
             know_encodings.append(l_encod)
             load_img.append(l_img)
         

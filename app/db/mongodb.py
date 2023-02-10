@@ -129,8 +129,9 @@ class MongoDB:
     
     async def create_user_persistencia(self,user:dict):
  
-        users = self._coll_pers.find({'numero_cedula':user['numero_cedula']})
+        users = self._coll_pers.find({'numero_cedula':user['numero_cedula'],"disabled":False})
         for u in users:
+            print(u)
             if user['numero_cedula'] in u.values():
                 raise HTTPException(
                     status_code=HTTP_409_CONFLICT,
@@ -200,9 +201,15 @@ class MongoDB:
 
     async def delete_user_persistencia(self,numero_cedula:str):
         try:
-            user = self._coll_pers.find_one_and_update({'numero_cedula':numero_cedula},{'$set':{
+            # print(numero_cedula)
+            user = self._coll_pers.find_one_and_update({'numero_cedula':numero_cedula,"disabled":False},{'$set':{
                 'disabled':True
             }})
+            if not user:
+                raise HTTPException(
+                    status_code=HTTP_409_CONFLICT,
+                    detail="Este usuario no existe"
+                )
             return user
         except PyMongoError:
             raise HTTPException(
@@ -212,7 +219,12 @@ class MongoDB:
     
     def get_user_by_numero_cedula(self,numero_cedula:str):
         try:
-            user =  self._coll_pers.find_one({"numero_cedula":numero_cedula})
+            user =  self._coll_pers.find_one({"numero_cedula":numero_cedula,"disabled":False})
+            if not user: 
+                raise HTTPException(
+                    status_code=HTTP_409_CONFLICT,
+                    detail="El usuario con este numero de identificacion no existe"
+                )
             return user
         except PyMongoError:
             raise HTTPException(
@@ -223,6 +235,11 @@ class MongoDB:
     def get_user_by_numero_cedula_all_data(self,numero_cedula:str):
         try:
             user = self._coll_pers.find_one({'numero_cedula':numero_cedula})
+            if not user: 
+                raise HTTPException(
+                    status_code=HTTP_409_CONFLICT,
+                    detail="El usuario con este numero de identificacion no existe"
+                )
             return user
         except PyMongoError:
             raise HTTPException(
@@ -250,7 +267,7 @@ class MongoDB:
             )
 
     async def create_user_with_file(self,user:dict,file:UploadFile = File(...)):
-        users = self._coll_pers.find({'numero_cedula':user['numero_cedula']})
+        users = self._coll_pers.find({'numero_cedula':user['numero_cedula'],"disabled":False})
         for u in users:
             if user['numero_cedula'] in u.values():
                 raise HTTPException(
