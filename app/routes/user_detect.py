@@ -387,6 +387,15 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
 
 @router.post('/compareImageFaceRecognitionTwo')
 async def compareImageFaceRecognitionTwo(image_compare:UploadFile = File(...)):
+    service = UserPersistenciaService()
+    direct = os.path.join(os.getcwd(),'Compare')
+    im = Image.open(image_compare.file)
+    im.save(str(direct +"/"+ image_compare.filename),quality=50)
+
+    load_image = face_recognition.load_image_file(str(direct+"/"+image_compare.filename))
+    encoding_image = face_recognition.face_encodings(load_image)[0]
+    
+
     pass
 
 
