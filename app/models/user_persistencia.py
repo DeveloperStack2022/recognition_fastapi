@@ -32,7 +32,6 @@ class BaseUserPersistencia(BaseModel):
 
 
 class UserPersistencia(BaseUserPersistencia):
-
     @validator('numero_cedula')
     def validate_numero_cedula(cls,v):
         if v is '':
@@ -79,6 +78,11 @@ class UpdateUserPersistencia(BaseModel):
     apellidos:Optional[str] = None
     # images_id: Optional[list] = None
     disable: Optional[bool] = None
+
+class UpdateUserPersistenciaArrayNumpy(BaseModel):
+    numero_cedula:Optional[str] = None
+    
+
 
 class PydanticObjectId(ObjectId):
     @classmethod

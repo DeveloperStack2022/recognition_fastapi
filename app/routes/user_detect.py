@@ -346,43 +346,72 @@ async def compareImageFaceRecognition(image_original:UploadFile = File(...),imag
         return await build_response(HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# @router.post('/compareImageFaceRecognitionTwo')
+# async def compareImageFaceRecognitionTwo(image_compare:UploadFile = File(...)):
+#     service = UserPersistenciaService()
+#     data = service.all_get_images_gridfs()
+#     direct = os.path.join(os.getcwd(),'Compare')
+#     im = Image.open(image_compare.file)
+#     # if im.mode in ("RGBA","p")
+#     im.save(str(direct +"/"+ image_compare.filename),quality=50)
+
+#     load_image = face_recognition.load_image_file(str(direct+"/"+image_compare.filename))
+#     encoding_image = face_recognition.face_encodings(load_image)[0]
+
+#     load_image_file = []
+#     face_encoding_image = []
+#     list_users = [] 
+    
+#     for file_ in data:
+#         img_IO = BytesIO(base64.standard_b64decode(file_['image_base64']))
+#         img_pil = Image.open(img_IO)
+#         img_pil = img_pil.convert('RGB')
+#         load_image = np.array(img_pil)
+#         # Si en caso de que se use np.array() -> 
+#         face_encoding = face_recognition.face_encodings(load_image)[0]
+#         load_image_file.append(load_image)
+#         face_encoding_image.append(face_encoding)
+#         list_users.append(file_['file_name'])
+    
+#     match = face_recognition.compare_faces(face_encoding_image,encoding_image,tolerance=0.5)
+#     user = ''
+#     f_distance = face_recognition.face_distance(face_encoding_image,encoding_image)
+#     f_match_percentage  = (1-f_distance)*100
+#     val = np.round(f_match_percentage,2)
+#     for index,match_ in enumerate(match): 
+#         if match_: 
+#             user = list_users[index]
+    
+#     service_data = service.get_user_by_numero_cedula(numero_cedula=user,valor_porcentaje=val.max())
+#     return service_data
+
 @router.post('/compareImageFaceRecognitionTwo')
 async def compareImageFaceRecognitionTwo(image_compare:UploadFile = File(...)):
+    pass
+
+
+@router.get('/ConvertImageToArray')
+async def convertToImageToNpArray():
     service = UserPersistenciaService()
     data = service.all_get_images_gridfs()
-    direct = os.path.join(os.getcwd(),'Compare')
-    im = Image.open(image_compare.file)
-    # if im.mode in ("RGBA","p")
-    im.save(str(direct +"/"+ image_compare.filename),quality=50)
-
-    load_image = face_recognition.load_image_file(str(direct+"/"+image_compare.filename))
-    encoding_image = face_recognition.face_encodings(load_image)[0]
-
-    load_image_file = []
-    face_encoding_image = []
-    list_users = [] 
-    
+   
     for file_ in data:
         img_IO = BytesIO(base64.standard_b64decode(file_['image_base64']))
         img_pil = Image.open(img_IO)
         img_pil = img_pil.convert('RGB')
+        # print(img_pil)
         load_image = np.array(img_pil)
-        face_encoding = face_recognition.face_encodings(load_image)[0]
-        load_image_file.append(load_image)
-        face_encoding_image.append(face_encoding)
-        list_users.append(file_['file_name'])
-    
-    match = face_recognition.compare_faces(face_encoding_image,encoding_image,tolerance=0.5)
-    user = ''
-    f_distance = face_recognition.face_distance(face_encoding_image,encoding_image)
-    f_match_percentage  = (1-f_distance)*100
-    val = np.round(f_match_percentage,2)
-    for index,match_ in enumerate(match): 
-        if match_: 
-            user = list_users[index]
-    
-    service_data = service.get_user_by_numero_cedula(numero_cedula=user,valor_porcentaje=val.max())
-    return service_data
+        string_np_ = np.array2string(load_image)
 
+        # print(string_np_)
+        # Save Image to mongodb np.array()
+        service.save_image(numero_cedula=file_['file_name'],image_array_list=string_np_)
+    return JSONResponse(
+            status_code=HTTP_200_OK,
+            content={
+                'success':True,
+                'payload':{ }
+            }
+        )
 
 #python3 -m uvicorn app.main:app  --reload

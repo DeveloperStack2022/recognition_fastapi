@@ -101,10 +101,20 @@ async def addUserPersistencia(cedula:str = Form(...),nombres: str = Form(...),co
     user:UserPersistencia = UserPersistencia(numero_cedula=cedula,nombres=nombres,anio_ins_nacimiento=anio_ins_nacimiento,images_id=[''],calles_domicilio=calles_domicilio,codigo_dactilar=codigo_dactilar,condicion_cedulado=condicion_cedulado,conyuge=conyuge,doble_nacionalidad=doble_nacionalidad,domicilio=domicilio,estado_civil=estado_civil,fecha_nacimiento=fecha_nacimiento,instruccion=instruccion,lugar_ins_nacimiento=lugar_ins_nacimiento,nacionalidad=nacionalidad,nacionalidad_madre=nacionalidad_madre,nacionalidad_padre=nacionalidad_padre,nombre_madre=nombre_madre,nombre_padre=nombre_padre,profession=profession)
     return await services.create_user_image_file(user,image)
 
+# @router.get('/get_users')
+# async def getUsersPersistencia():
+#     services = UserPersistenciaService()
+#     return await services.get_users_persistencia()
+
+@router.get('getNDocuments')
+async def getNDocuments():
+    services =  UserPersistenciaService()
+    return await services.get_n_documents()
+
 @router.get('/get_users')
-async def getUsersPersistencia():
+async def getUsersPersistenciaPaginate(n_page:int):
     services = UserPersistenciaService()
-    return await services.get_users_persistencia()
+    return await services.get_users_persistencia(n_page=n_page)
 
 @router.get("/getImages")
 async def getOneUserByNumCedula(numero_cedula:str):

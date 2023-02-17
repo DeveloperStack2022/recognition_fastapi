@@ -26,15 +26,28 @@ class UserPersistenciaService:
         
         return await build_response(HTTP_201_CREATED,msg="New User Created")
     
-    async def get_users_persistencia(self):
-        users = await self._db.get_user_persistencia(numero_page=int(1))
-        userList = [OutUserPersistencia(**user) for user in users]
+    async def get_n_documents(self):
+        documents = await self._db.get_user_persistencia_nPage()
+        return JSONResponse(
+            status_code=HTTP_200_OK,
+            content={
+                "n_documents":documents
+            }
+        )
+        
+    async def get_users_persistencia(self,n_page:int = 1):
+        users = await self._db.get_user_persistencia(numero_page=n_page)
+       
+        userList = [OutUserPersistencia(**user) for user in users['users']]
         if users:
            return JSONResponse(
             status_code=HTTP_200_OK,
             content={
                 'success': True,
-                'payload': jsonable_encoder(userList)
+                'payload': jsonable_encoder(userList),
+                'total_pages':users['total_pages'],
+                'current_pages':users['current_pages'],
+                'n_documents_':users['n_documents_']
             },
         )
         
@@ -87,6 +100,7 @@ class UserPersistenciaService:
                 'payload':jsonable_encoder(data_list)
             }
         )
+    
     def all_get_images_gridfs(self):
         data = self._db.all_images_user()
         lista = []
@@ -147,3 +161,10 @@ class UserPersistenciaService:
                 }
             }
         )
+
+    def save_image(self,numero_cedula:str,image_array_list):
+       return self._db.convert_image_to_numpy_array(numero_cedula,image_array_list)     
+
+
+    def get_data_solo_imgArrays(self):
+        return self._db.

@@ -1,3 +1,4 @@
+import math
 import base64
 import logging
 from fastapi import File,UploadFile
@@ -145,6 +146,16 @@ class MongoDB:
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="PyMongo DB error"
             )
+
+    async def get_user_persistencia_nPage(self):
+        try:
+            n_documents_:int = self._coll_pers.count_documents({})
+            print(n_documents_)
+            return 1
+        except Exception as e: 
+            raise(e)
+
+
     async def get_user_persistencia(self,numero_page:int):
         try:
             """ 
@@ -182,17 +193,31 @@ class MongoDB:
                 .skip(10 * 9).limit(10)
                 .skip(90).limit(10)
             """
-            page_limit_ = PAGE_LIMIT
+            page_limit_:int = PAGE_LIMIT
             n_documents_:int = self._coll_pers.count_documents({})
-            if int(n_documents_) >  int(page_limit_) * (numero_page - 1): # 10 * (2 - 1) => 10 * 1 = 10  | si n_documents_ > 10 ?  True : false
-                users = self._coll_pers.find({"disabled":False}).skip(int(page_limit_) * (numero_page - 1)).limit(int(page_limit_))
-            else:
-                numero_page_ = 1
-                users = self._coll_pers.find({"disabled":False}).skip(int(page_limit_) * (numero_page_ - 1)).limit(int(page_limit_))
+            total_pages = math.ceil(n_documents_ / page_limit_ )
+           
+            # print(total_pages)
+            # 10 *  - 1 
+            if numero_page == 0: numero_page = 1
+            users = self._coll_pers.find({"disabled":False}).skip(page_limit_ * (numero_page - 1)).limit(page_limit_)
+        
+            # if int(n_documents_) >  page_limit_ * (numero_page - 1): # 10 * (2 - 1) => 10 * 1 = 10  | si n_documents_ > 10 ?  True : false
+            #     users = self._coll_pers.find({"disabled":False}).skip(page_limit_ * (numero_page - 1)).limit(page_limit_)
+            #     current_pages = math.ceil( n_documents_ % numero_page ) # page 0 | 1 | 2 | 3 | 4
+            # else:
+            #     numero_page_ = 1
+            #     users = self._coll_pers.find({"disabled":False}).skip(page_limit_ * (numero_page_ - 1)).limit(page_limit_)
+                
             # users = self._coll_pers.find({"disabled":False}).skip(0).limit(10)
             if not users:
                 return False
-            return list(users)
+            return {
+                'users':list(users),
+                'total_pages':total_pages,
+                'current_pages':2,
+                'n_documents_':n_documents_
+            }
         except PyMongoError:
             raise HTTPException(
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
@@ -311,4 +336,15 @@ class MongoDB:
             read_base64 = image.read()
             image_lists.append({'image_base64':read_base64,"file_name":image.file_name})
         return image_lists
+    
+    def convert_image_to_numpy_array(self,numero_cedula:str,image_array_list:list):
+        self._coll_pers.find_one_and_update({'numero_cedula':numero_cedula},{
+            '$push':{
+                'image_array':image_array_list
+            }
+        })
+        return True
+
+    def get_data_imgArrays(self):
+        self._coll_pers.find({},{})
     
