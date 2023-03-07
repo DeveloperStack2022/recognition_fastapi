@@ -131,7 +131,6 @@ class AuthService:
         }
 
         access, refresh = await self._create_jwt_token(payload, access_token_expires)
-        print(access)
         return JSONResponse(
             status_code=HTTP_200_OK,
             content={

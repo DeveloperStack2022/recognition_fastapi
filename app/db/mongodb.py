@@ -147,11 +147,10 @@ class MongoDB:
                 detail="PyMongo DB error"
             )
 
-    async def get_user_persistencia_nPage(self):
+    def get_user_persistencia_nPage(self):
         try:
             n_documents_:int = self._coll_pers.count_documents({})
-            print(n_documents_)
-            return 1
+            return n_documents_
         except Exception as e: 
             raise(e)
 
@@ -337,14 +336,26 @@ class MongoDB:
             image_lists.append({'image_base64':read_base64,"file_name":image.file_name})
         return image_lists
     
-    def convert_image_to_numpy_array(self,numero_cedula:str,image_array_list:list):
+    def convert_image_to_numpy_array(self,numero_cedula:str,image_array_list:any):
         self._coll_pers.find_one_and_update({'numero_cedula':numero_cedula},{
             '$push':{
                 'image_array':image_array_list
             }
-        })
+        }) 
+        # self._coll_pers.find_one_and_update({'numero_cedula':numero_cedula},{
+        #     '$pop':{
+        #         'image_array':1
+        #     }
+        # })
         return True
 
-    def get_data_imgArrays(self):
-        self._coll_pers.find({},{})
+    def get_data_imgArrays(self,img_array):
+        # values_ = self._coll_pers.find({'image_array':{"$elemMatch":img_array}})
+        # print(values_)
+        # for data in values_:
+        #     print(data) 
+        return True
     
+
+    def get_user_paginate(self,skip:int,limit:int):
+        return self._coll_pers.find({"disabled":False}).skip(limit * (skip - 1)).limit(limit)

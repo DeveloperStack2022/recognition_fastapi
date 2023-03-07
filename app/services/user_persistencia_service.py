@@ -1,4 +1,6 @@
+import face_recognition
 import os
+from PIL import Image
 from fastapi.encoders import jsonable_encoder
 from http.client import HTTPException
 from ..utils import build_response
@@ -11,7 +13,7 @@ from starlette.status import (
 )
 from starlette.responses import JSONResponse
 from fastapi import File,UploadFile
-import base64
+import numpy as np
 
 
 class UserPersistenciaService:
@@ -37,7 +39,6 @@ class UserPersistenciaService:
         
     async def get_users_persistencia(self,n_page:int = 1):
         users = await self._db.get_user_persistencia(numero_page=n_page)
-       
         userList = [OutUserPersistencia(**user) for user in users['users']]
         if users:
            return JSONResponse(
@@ -166,5 +167,35 @@ class UserPersistenciaService:
        return self._db.convert_image_to_numpy_array(numero_cedula,image_array_list)     
 
 
-    def get_data_solo_imgArrays(self):
-        return self._db.
+    def get_data_solo_imgArrays(self,skip:int,limit:int,encoding_image):
+        # return self._db.get_data_imgArrays(img_array)
+        users_ =  self._db.get_user_paginate(limit=limit,skip=skip)
+        # print(n_documents)
+        # print(users_[0]['image_array'][0]) #TODO: Esto si funciona
+        face_encoding_images:list = []
+        for data_ in users_:
+            for key,value in data_.items():
+                if key == 'image_array':
+                    for value_ in value:
+                        valor__ = np.frombuffer(value_,dtype=np.int32).reshape((2,2,3))
+                        print(valor__)
+                        # vector_str = str(value_)
+                        # vector_bytes_encode = vector_str.encode()
+                        # vector_bytes_decode = vector_bytes_encode.decode('unicode-escape').encode('ISO-8859-1')[2:-1]
+                        # print(valor__)
+                        # valor = face_recognition.face_encodings(valor__)[0]
+                        # print(valor)
+                        # print(face_recognition.face_encodings(value_)[0])
+                        # face_encoding_images.append()
+
+                        
+        # HACK: Compare images 
+        # compare_face = face_recognition.compare_faces(face_encoding_images,encoding_image,tolerance=0.5)
+        # print(compare_face)
+        return JSONResponse(
+            status_code=HTTP_200_OK,
+            content={
+                'success':True,
+                'payload':{ }
+            }
+        )
