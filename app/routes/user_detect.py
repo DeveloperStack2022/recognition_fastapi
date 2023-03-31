@@ -412,13 +412,15 @@ async def convertToImageToNpArray(numero_cedula:str):
         img_pil = img_pil.convert('RGB')
         # print(img_pil)
         load_image = np.array(img_pil)
-        arr_bytes = load_image.tolist()
-        print(load_image.shape) 
+
+        # arr_bytes = load_image.tolist()
+        # print(load_image.shape) 
         # arr_list = load_image.tolist()
         # string_np_ = np.array2string(load_image)
         # print(string_np_)
         # Save Image to mongodb np.array()
-        service.save_image(numero_cedula=file_['file_name'],image_array_list=arr_bytes)
+        convert_array_str  = np.array2string(load_image) 
+        service.save_image(numero_cedula=file_['file_name'],image_array_list=convert_array_str)
     return JSONResponse(
             status_code=HTTP_200_OK,
             content={

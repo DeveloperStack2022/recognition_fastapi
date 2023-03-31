@@ -41,7 +41,7 @@ async def addUserPersistencia(cedula:str = Form(...),nombres: str = Form(...),co
     image: UploadFile = File(...)):
     
     respuesta = verify_cedula(cedula)
-    if not respuesta:
+    if not respuesta: 
         return await build_response(HTTP_400_BAD_REQUEST,msg="Numero de cedula no es correcto")
     services = UserPersistenciaService()
     

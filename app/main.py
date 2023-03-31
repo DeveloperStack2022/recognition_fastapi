@@ -22,7 +22,8 @@ from .routes import (
     UserRoutes,
     AuthRoutes,
     UserPersistencia,
-    UserDetect
+    UserDetect,
+    FilesUpload
 )
 
 
@@ -46,6 +47,7 @@ app.include_router(UserRoutes, prefix=f'{API_PREFIX}/users')
 app.include_router(AuthRoutes, prefix=f'{API_PREFIX}/oauth')
 app.include_router(UserPersistencia,prefix=f'{API_PREFIX}/userpersistencia')
 app.include_router(UserDetect,prefix=f'{API_PREFIX}/userdetect')
+app.include_router(FilesUpload,prefix=f'{API_PREFIX}/folderUpload')
 
 app.add_exception_handler(HTTPException, http_exception_handler)
 

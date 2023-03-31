@@ -1,3 +1,4 @@
+import numpy as np
 import math
 import base64
 import logging
@@ -13,7 +14,7 @@ from bson import ObjectId
 from pymongo.errors import PyMongoError
 from pymongo import (
     MongoClient,
-    ReturnDocument
+    ReturnDocument,
 )
 from ..configs import (
     MONGO_DB_NAME,
@@ -337,6 +338,7 @@ class MongoDB:
         return image_lists
     
     def convert_image_to_numpy_array(self,numero_cedula:str,image_array_list:any):
+        # TODO:  
         self._coll_pers.find_one_and_update({'numero_cedula':numero_cedula},{
             '$push':{
                 'image_array':image_array_list

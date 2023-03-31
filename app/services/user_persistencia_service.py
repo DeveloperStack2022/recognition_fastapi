@@ -1,4 +1,5 @@
 import face_recognition
+from ..utilsF.nd_array_json import SerializeJSON
 import os
 from PIL import Image
 from fastapi.encoders import jsonable_encoder
@@ -164,6 +165,7 @@ class UserPersistenciaService:
         )
 
     def save_image(self,numero_cedula:str,image_array_list):
+    #    SerializeJSON(numero_cedula,image_array_list)
        return self._db.convert_image_to_numpy_array(numero_cedula,image_array_list)     
 
 
@@ -177,16 +179,19 @@ class UserPersistenciaService:
             for key,value in data_.items():
                 if key == 'image_array':
                     for value_ in value:
-                        valor__ = np.frombuffer(value_,dtype=np.int32).reshape((2,2,3))
-                        print(valor__)
+                        convert_array = np.asarray(value_)
+                        # print(convert_array)
+                        valor = face_recognition.face_encodings(convert_array)[0]
+                        face_encoding_images.append(valor)
+
+                        # valor__ = np.frombuffer(value_,dtype=np.int32).reshape((2,2,3))
+                        # print(valor__)
                         # vector_str = str(value_)
                         # vector_bytes_encode = vector_str.encode()
                         # vector_bytes_decode = vector_bytes_encode.decode('unicode-escape').encode('ISO-8859-1')[2:-1]
                         # print(valor__)
-                        # valor = face_recognition.face_encodings(valor__)[0]
                         # print(valor)
                         # print(face_recognition.face_encodings(value_)[0])
-                        # face_encoding_images.append()
 
                         
         # HACK: Compare images 
