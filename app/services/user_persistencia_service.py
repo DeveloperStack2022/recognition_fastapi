@@ -16,6 +16,8 @@ from starlette.responses import JSONResponse
 from fastapi import File,UploadFile
 import numpy as np
 
+import base64
+
 
 class UserPersistenciaService:
     def __init__(self):
@@ -84,9 +86,8 @@ class UserPersistenciaService:
     
     async def create_user_image_file(self,user:UserPersistencia,file:UploadFile = File(...)):
         user_persistencia_dict:dict = user.dict()
-        
         _ = await self._db.create_user_with_file(user_persistencia_dict,file)
-
+        
         return await build_response(HTTP_201_CREATED,msg="Usuario creado exitosamente")
        
     async def get_image_user_gridfs(self,numero_cedula:str):
@@ -110,7 +111,6 @@ class UserPersistenciaService:
             # print(file_['file_name'])
             lista.append({"image_base64":file_['image_base64'],"file_name":file_['file_name']})
         return lista
-    
 
     def get_user_by_numero_cedula(self,numero_cedula:str,valor_porcentaje:float):
         data =  self._db.get_user_by_numero_cedula(numero_cedula=numero_cedula)
@@ -126,9 +126,12 @@ class UserPersistenciaService:
                 }
             }
         )
+    
     def get_user_by_numero_cedula_all_data(self,numero_cedula:str):
+        
         data = self._db.get_user_by_numero_cedula_all_data(numero_cedula=numero_cedula)
-        image_data_ =   self._db.get_images_user(numero_cedula=numero_cedula)
+        image_data_ = self._db.get_images_user(numero_cedula=numero_cedula)
+
         lista = []
         for res in image_data_:
             lista.append({"image_base64":res['image_base64']})

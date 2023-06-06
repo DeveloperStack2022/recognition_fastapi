@@ -1,21 +1,4 @@
-import numpy as np
-import math
-import base64
-import logging
-from fastapi import File,UploadFile
-from fastapi.exceptions import HTTPException
-from PIL import Image
-from pydantic import (Field)
-from starlette.status import (
-    HTTP_409_CONFLICT,
-    HTTP_500_INTERNAL_SERVER_ERROR
-)
-from bson import ObjectId
-from pymongo.errors import PyMongoError
-from pymongo import (
-    MongoClient,
-    ReturnDocument,
-)
+# TODO: Configs 
 from ..configs import (
     MONGO_DB_NAME,
     MONGO_USERS_COLLECTION,
@@ -23,9 +6,44 @@ from ..configs import (
     MONGO_USER_DETECT_COLLECTION,
     PAGE_LIMIT
 )
+
+# TODO: Generics - 
+import math
+import base64
+import logging
+from bson import ObjectId
+from typing import List
+
+# TODO: Fast API - 
+from fastapi import File,UploadFile
+from fastapi.exceptions import HTTPException
+
+from PIL import Image
+# TODO: Status Http - 
+from starlette.status import (
+    HTTP_409_CONFLICT,
+    HTTP_500_INTERNAL_SERVER_ERROR
+)
+# TODO: Mongod DB - 
+from pymongo.errors import PyMongoError,BulkWriteError
+from pymongo import (
+    MongoClient,
+    ReturnDocument,
+)
+# TODO: GridFs 
 import gridfs
 
+# TODO: Upload File Model - 
+from ..models.file_upload_models import BaseFileUploadModel,FileUploadModelLista,BaseDataInputFileUpload,BaseDataInputFieldUploadList
+from bson.objectid import ObjectId as BsonObjectId
 
+# TODO: import module sistema operativo - (os)
+import os 
+
+#TODO: Utils 
+from app import utils
+
+# FIXME: Start class MongoDB:
 class MongoDB:
     def __init__(self, client: MongoClient):
         self._client: MongoClient = client
@@ -41,6 +59,9 @@ class MongoDB:
             self._coll = self._db[MONGO_USERS_COLLECTION]
             self._coll_pers = self._db[MONGO_USER_PERSISTENCIA_COLLECTION]
             self._coll_detect = self._db[MONGO_USER_DETECT_COLLECTION]
+
+            # 
+            self._coll_pers.create_index('numero_cedula',unique=True)
 
         except PyMongoError as e:
            logging.error(f'Database Connection Error ::: {e}')
@@ -61,7 +82,6 @@ class MongoDB:
                     status_code=HTTP_409_CONFLICT,
                     detail="This email is already in use"
                 )
-
         try:
             id = self._coll.insert_one(user).inserted_id
             return str(id)
@@ -281,6 +301,8 @@ class MongoDB:
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="PyMongo DB Error"
             )
+        
+
     async def delete_user_detect(self,numero_cedula:str):
         try:
             self._coll_detect.delete_many({})
@@ -292,7 +314,7 @@ class MongoDB:
             )
 
     async def create_user_with_file(self,user:dict,file:UploadFile = File(...)):
-        users = self._coll_pers.find({'numero_cedula':user['numero_cedula'],"disabled":False})
+        users = await self._coll_pers.find({'numero_cedula':user['numero_cedula'],"disabled":False})
         for u in users:
             if user['numero_cedula'] in u.values():
                 raise HTTPException(
@@ -317,6 +339,112 @@ class MongoDB:
                 detail="Mongo Db Error"
             )
 
+    def create_user_with_file_CSV(self,user: FileUploadModelLista): #,file: UploadFile = File(...)
+        """
+            user = [{'numero_cedula':'2300143571','nombres':'Juanito David','apellidos':'Zambrano Piero'},{...},{...},{...}]
+            
+            - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+            1. Read "path_dir" del Archivo
+            2. 
+            fs.put()
+        """ 
+        data_user_dict:List[BaseFileUploadModel] = user.dict().get('users')
+
+        fs = self._gridfs
+        list_filter = []
+
+        # TODO: Path Dir files Images 
+        path_root = os.getcwd() + '/FilesUpload'
+
+        
+        for lista in data_user_dict:
+            # print(lista['nombres']) # HACK: Funciona = True
+            validation = self._coll_pers.find_one({'numero_cedula':lista['numero_cedula']})
+           
+            if validation is not None:
+                string_var = path_root + "/"+lista['numero_cedula']+".png"
+                with open( string_var ,'rb') as file_:
+                    encode_base64_ = base64.standard_b64encode(file_.read())
+                    image_ = Image.open(f'''{path_root}/{lista['numero_cedula']}.png''')
+                    width_,height_ = image_.size
+                    id_fs_ = fs.put(encode_base64_,file_name=str(lista['numero_cedula']),sizeX=width_,sizeY=height_)
+                    list_filter.append({'numero_cedula':lista['numero_cedula'],'nombres':lista['nombres'],'file':[id_fs_]})
+        
+        if len(list_filter) > 0 : 
+            self._coll_pers.insert_many(list_filter).inserted_ids
+
+    async def create_user_with_file_csv_fields(self,data:BaseDataInputFieldUploadList):
+        # print(dict(data.users))
+        data_users: List[BaseDataInputFileUpload] = data.dict().get('users')
+        path_root = os.getcwd() + '/FilesUpload'
+        fs = self._gridfs
+        lista_filter = []
+        for i in data_users:
+            verify = utils.verify_cedula(num=i['numero_cedula'])
+            if verify:
+                validation = self._coll_pers.find_one({'numero_cedula':i['numero_cedula']})
+                # validation = self._coll_pers.find_one_and_update({'numero_cedula':i['numero_cedula']},{
+                #     '$set':{
+                    # 'disabled':False,
+                    # 'condicion_cedulado':'',
+                    # 'anio_ins_nacimiento':'',
+                    # 'nacionalidad':'',
+                    # 'codigo_dactilar':'',
+                    # 'estado_civil':'',
+                    # 'conyuge':'',
+                    # 'instruccion':'',
+                    # 'profession':'',
+                    # 'nombre_padre':'',
+                    # 'nacionalidad_padre':'',
+                    # 'nombre_madre':'',
+                    # 'nacionalidad_madre':'',
+                    # 'domicilio':'',
+                    # 'calles_domicilio':'',
+                    # 'doble_nacionalidad':''
+                #     }}) # TODO: Return Veradero - falso
+
+        #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+                if validation is None: # False -> True | True -> False
+                    string_var = path_root + "/" + i['numero_cedula']+".jpg"
+                    if os.path.exists(string_var):
+                        with open(string_var,'rb') as write_file:
+                            encode_base64_ = base64.standard_b64encode(write_file.read())
+                            image_ = Image.open(f'''{path_root}/{i['numero_cedula']}.jpg''')
+                            width_,height_ = image_.size
+                            id_fs_ = fs.put(encode_base64_,file_name=str(i['numero_cedula']),sizeX=width_,sizeY=height_)
+
+                            lista_filter.append({
+                                'numero_cedula':i['numero_cedula'],
+                                'nombres':i['nombres'],
+                                'nacionalidad':i['nacionalidad'],
+                                'lugar_ins_nacimiento':i['lugar_nacimiento'],
+                                'file':[id_fs_],
+                                'disabled':False,
+                                'condicion_cedulado':'',
+                                'anio_ins_nacimiento':'',
+                                'nacionalidad':'',
+                                'codigo_dactilar':'',
+                                'estado_civil':'',
+                                'conyuge':'',
+                                'instruccion':'',
+                                'profession':'',
+                                'nombre_padre':'',
+                                'nacionalidad_padre':'',
+                                'nombre_madre':'',
+                                'nacionalidad_madre':'',
+                                'domicilio':'',
+                                'calles_domicilio':'',
+                                'doble_nacionalidad':''
+                                })
+
+        try:
+
+            if len(lista_filter) > 0:
+                self._coll_pers.insert_many(lista_filter).inserted_ids
+        except BulkWriteError  as Error:
+            print(Error)
+        
     def get_images_user(self,numero_cedula:str):
         # print(numero_cedula)
         fs = self._gridfs 
@@ -357,7 +485,9 @@ class MongoDB:
         # for data in values_:
         #     print(data) 
         return True
-    
 
     def get_user_paginate(self,skip:int,limit:int):
         return self._coll_pers.find({"disabled":False}).skip(limit * (skip - 1)).limit(limit)
+    
+
+    

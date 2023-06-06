@@ -58,11 +58,16 @@ def createDir(nameDir:str) -> str:
     return FOLDER
 
 def verify_cedula(num:str) -> bool:
+    
+    if len(num) < 10:
+        return False
+    
     indice = 0
     validation = True
     resultado:list = []
     ultimoValor = num[9]
     total = 0
+
     while indice < len(num) - 1:
         numero:int = int(num[indice])
         # print(f'{numero} \n')
