@@ -437,7 +437,6 @@ class MongoDB:
                                 'calles_domicilio':'',
                                 'doble_nacionalidad':''
                                 })
-
         try:
 
             if len(lista_filter) > 0:

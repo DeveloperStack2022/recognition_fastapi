@@ -10,14 +10,12 @@ import os
 # TODO: Service - 
 from ..services.files_upload_services import FileUploadFilesService
 # TODO: Models - 
-from ..models.file_upload_models import FileUploadModelLista,BaseDataInputFileUpload,BaseDataInputFieldUploadList
+from ..models.file_upload_models import FileUploadModelLista,BaseDataInputFieldUploadList
 
 #  ----- 
 path_save = os.path.join(os.getcwd(),'FilesUpload')
 
 router = APIRouter()
-
-
 
 @router.post('/folderUpload')
 async def UploadFolder(file: UploadFile = File(...)):
@@ -36,7 +34,7 @@ async def UploadFolder(file: UploadFile = File(...)):
             status_code=HTTP_200_OK,
             content={   
                 'success':True,
-                'message':'Archivos guardados correctamente.' 
+                'message':'Archivos guardados correctamente.'   
             }
         )
     except FileNotFoundError as err: 
