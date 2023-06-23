@@ -6,8 +6,6 @@ from app.domain.configuration_entity import ConfigurationEntity
 class ConfigurationMapper:
     def __init__(self,env:str) -> None:
 
-        env = env.lower()
-
         __config_raw:Dict[str,Optional[str]] = dotenv_values('.env')
         
         uri_database = __config_raw.get('MONGODB_URI')

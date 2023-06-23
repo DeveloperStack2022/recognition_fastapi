@@ -3,6 +3,9 @@ from injector import Injector,SingletonScope
 from fastapi_injector import attach_injector
 from fastapi import FastAPI
 
+#Controllers  
+from app.adapter.api.datos_generales_fact import datos_generales_fact_controller as datosGeneralesController
+
 # 
 from app.domain.configuration_entity import ConfigurationEntity
 from .configuration_mapper import ConfigurationMapper
@@ -18,6 +21,8 @@ repository_factory =  RepositoryFactory(config=config,db_connection=db_connectio
 
 def create_app(injector:Injector) -> FastAPI:
     app:FastAPI = FastAPI()
+
+    app.include_router(datosGeneralesController.router,prefix='/api/v2/datosGenerales',tags=['DatosGenerales'])
 
     injector.binder.bind(RepositoryFactory,to=repository_factory,scope=SingletonScope)
 

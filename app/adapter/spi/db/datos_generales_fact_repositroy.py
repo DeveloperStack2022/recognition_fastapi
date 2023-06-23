@@ -12,11 +12,22 @@ class DatosGeneralesRepositoryFactory(DatosGeneralesRepositoryAbstract):
 
     def get_datos_generales(self) -> typing.List[DatosGeneralesEntity]:
         res = self.db_connection.get_client()['new_project']
+        
         res = res['user_persistencia_collection']
 
         data = res.find()
-
         if not data:
             raise ApiException("couldn't retrieve Users fact from user_persistencia_collection")
 
         return self.mapper.to_entity(data)
+
+    def create_datos_generales(self,datos:DatosGeneralesEntity) -> typing.Dict[DatosGeneralesEntity,any]:
+        res = res['user_persistencia_collection']
+
+        data = res.insert_one(datos).inserted_id
+        data = res.find_one({'_id':data})
+        if  not data:
+            raise ApiException("Couldn't retrieve Users fact from user_persistencia_collection")
+        
+        return self.mapper.to_entity(data)
+        

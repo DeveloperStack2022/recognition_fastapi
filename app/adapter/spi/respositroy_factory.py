@@ -8,11 +8,14 @@ class RepositoryFactory:
     
     def __init__(self,config:ConfigurationEntity,db_connection:DbConnection,http_connection:HttpConnection) -> None:
         self.__repositories:dict = {
-            'users_collection': DatosGeneralesRepositoryFactory(db_connection=db_connection)
+            'users_collection': DatosGeneralesRepositoryFactory(db_connection=db_connection),
+            'create_datos_generales':DatosGeneralesRepositoryFactory(db_connection=db_connection)
         }
 
     def get_repository(self,repository_name:str):
+        
         if repository_name in self.__repositories:
             return self.__repositories[repository_name]
         else:
             raise ApiException('Repository does not exist')
+    
