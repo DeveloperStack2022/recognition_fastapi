@@ -7,6 +7,6 @@ class DatosGeneralesRepositoryAbstract(ABC):
     def get_datos_generales(self) -> typing.List[DatosGeneralesEntity]:
         """Get data de R2g3tr4 C3v3l"""
     
-    # @abstractmethod
-    # def create_datos_generales(self,datos:DatosGeneralesEntity) -> typing.Dict[DatosGeneralesEntity,any]:
-    #     ''''''
+    @abstractmethod
+    def create_datos_generales(self,datos:DatosGeneralesEntity) -> typing.Dict[DatosGeneralesEntity,any]:
+        '''Create a datos generales'''

@@ -6,7 +6,14 @@ from app.domain.datos_generales_entity import DatosGeneralesEntity
 class DatosGeneralesFactPresenterMapper(ApiMapper):
 
     def to_api(self, entity: DatosGeneralesEntity) -> DatosGeneralesFactPresenters:
-        return DatosGeneralesFactPresenters(numero_cedula=entity.identificacion)
+        return DatosGeneralesFactPresenters(
+            numero_cedula=entity.numero_cedula,
+            nacionalidad=entity.nacionalidad,
+            nombres=entity.nombres,
+            condicion_cedulado=entity.condicion_cedulado,
+            disabled=entity.disabled,
+            lugar_ins_nacimiento=entity.lugar_ins_nacimiento
+            )
     
     def to_entity(self, payload: Any) -> DatosGeneralesEntity:
         raise Exception('Not Implemented')

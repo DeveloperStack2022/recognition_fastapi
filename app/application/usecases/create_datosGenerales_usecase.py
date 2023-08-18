@@ -16,4 +16,5 @@ class CreateDatosGeneralesUseCase(UseCaseOneEntity):
         try:
             return self.repository.create_datos_generales(datos=self.datos)
         except Exception as exception: 
+            print(exception)
             raise ErrorHandlingUtils.application_error('Can not create datos generalos')

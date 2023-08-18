@@ -8,8 +8,8 @@ class RepositoryFactory:
     
     def __init__(self,config:ConfigurationEntity,db_connection:DbConnection,http_connection:HttpConnection) -> None:
         self.__repositories:dict = {
-            'users_collection': DatosGeneralesRepositoryFactory(db_connection=db_connection),
-            'create_datos_generales':DatosGeneralesRepositoryFactory(db_connection=db_connection)
+            'users_collection': DatosGeneralesRepositoryFactory(db_connection=db_connection,config=config),
+            'create_datos_generales':DatosGeneralesRepositoryFactory(db_connection=db_connection,config=config)
         }
 
     def get_repository(self,repository_name:str):

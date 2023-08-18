@@ -14,6 +14,6 @@ class GetAllDatosGeneralesUseCase(UseCaseMultipleEntities):
         try:
             return self.repository.get_datos_generales()
         except Exception as exception:
-            raise ErrorHandlingUtils.application_error('Cannot get all datos generales de R2g3str4 C3v3l')
+            raise ErrorHandlingUtils.application_error('Cannot get all datos generales de R2g3str4 C3v3l',exception)
 
     
